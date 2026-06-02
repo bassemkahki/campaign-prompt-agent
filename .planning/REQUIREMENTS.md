@@ -40,15 +40,15 @@
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| BACK-01 | | — |
-| BACK-02 | | — |
-| ANAL-01 | | — |
-| ANAL-02 | | — |
-| IMG-01 | | — |
-| IMG-02 | | — |
-| IMG-03 | | — |
-| VID-01 | | — |
-| VID-02 | | — |
-| VID-03 | | — |
-| WORK-01 | | — |
-| WORK-02 | | — |
+| BACK-01 | Phase 1 | Pending |
+| BACK-02 | Phase 1 | Pending |
+| ANAL-01 | Phase 1 | Pending |
+| ANAL-02 | Phase 2 | Pending |
+| IMG-01 | Phase 2 | Pending |
+| IMG-02 | Phase 2 | Pending |
+| IMG-03 | Phase 2 | Pending |
+| VID-01 | Phase 3 | Pending |
+| VID-02 | Phase 3 | Pending |
+| VID-03 | Phase 3 | Pending |
+| WORK-01 | Phase 4 | Pending |
+| WORK-02 | Phase 1 | Pending |
