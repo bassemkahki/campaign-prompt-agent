@@ -18,7 +18,9 @@
   1. User can install the agent in a local folder and confirm it is connected to Claude Code/Gemini CLI via MCP.
   2. User can provide a campaign brief (PDF or Markdown) and receive a confirmation that the data was extracted.
   3. User can verify that campaign data is stored and processed locally within the project folder.
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 01-01-PLAN.md — Establish the Walking Skeleton foundation.
+- [ ] 01-02-PLAN.md — Implement the Creative Ingestion vertical slice.
 
 ### Phase 2: Visual Synthesis & Image Engineering
 **Goal**: Transform creative direction into optimized image prompts.
@@ -56,7 +58,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Analysis | 0/0 | Not started | - |
+| 1. Foundation & Analysis | 0/2 | Not started | - |
 | 2. Visual Synthesis & Image Engineering | 0/0 | Not started | - |
 | 3. Motion & Multimodal Video | 0/0 | Not started | - |
 | 4. Workflow Optimization | 0/0 | Not started | - |
