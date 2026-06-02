@@ -3,24 +3,29 @@
 ## v1 Requirements
 
 ### Core Backbone (MCP)
-- [ ] **BACK-01**: MCP Server Integration — Implement an MCP server that exposes prompt engineering tools to Claude Code and Gemini CLI.
-- [ ] **BACK-02**: Local Project Installation — Ensure the agent can be installed and configured within a local project folder.
+
+- [x] **BACK-01**: MCP Server Integration — Implement an MCP server that exposes prompt engineering tools to Claude Code and Gemini CLI.
+- [x] **BACK-02**: Local Project Installation — Ensure the agent can be installed and configured within a local project folder.
 
 ### Analysis & Ingestion
+
 - [ ] **ANAL-01**: Multi-Format Creative Ingestion — Parse campaign documentation from PDF, PPTX, and Markdown formats using high-fidelity extraction (Docling recommended).
 - [ ] **ANAL-02**: Art Direction Synthesis — Extract key visual elements, art direction, and moodboard inspiration into a structured creative brief.
 
 ### Image Prompt Engineering
+
 - [ ] **IMG-01**: Soul V2 Formula Generation — Generate optimized prompts for Soul V2 following the `Subject + Outfit + Pose + Camera` formula.
 - [ ] **IMG-02**: Soul Cinema Cinematic Prompts — Generate prompts for Soul Cinema with exact camera, cinematography, and lighting details based on the creative brief.
 - [ ] **IMG-03**: Stylized Image Consistency — Ensure generated prompts maintain the campaign's stylization and art direction.
 
 ### Video Prompt Engineering
+
 - [ ] **VID-01**: Seedance 2.0 Image-to-Video Prompts — Generate prompts for Seedance 2.0 that accurately translate scripts into motion.
 - [ ] **VID-02**: Motion Directing Details — Include exact motion and cinematography details (Dolly, Orbit, etc.) based on script energy.
 - [ ] **VID-03**: Multimodal Referencing — Implement the `@mention` syntax (e.g., `@Image1`) to maintain visual identity from image to video.
 
 ### Workflow & State Management
+
 - [ ] **WORK-01**: Input Checklist Generation — Automatically identify missing creative data (e.g., missing colors, Soul IDs) and generate a to-do list for the user.
 - [ ] **WORK-02**: Project-Level Isolation — Ensure all campaign data and prompts remain within the local project environment.
 
@@ -40,8 +45,8 @@
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| BACK-01 | Phase 1 | Pending |
-| BACK-02 | Phase 1 | Pending |
+| BACK-01 | Phase 1 | Complete |
+| BACK-02 | Phase 1 | Complete |
 | ANAL-01 | Phase 1 | Pending |
 | ANAL-02 | Phase 2 | Pending |
 | IMG-01 | Phase 2 | Pending |
