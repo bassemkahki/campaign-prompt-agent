@@ -1,0 +1,39 @@
+{
+  "name": "campaign-prompt-agent",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "MCP server for creative campaign ingestion and prompt generation",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "tsc",
+    "start": "tsx src/index.ts",
+    "mcp": "tsx src/mcp/server.ts"
+  },
+  "keywords": [
+    "mcp",
+    "ai",
+    "creative",
+    "briefing"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "ai": "6.0.194",
+    "commander": "15.0.0",
+    "sharp": "0.33.5",
+    "zod": "3.25.76",
+    "zustand": "5.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "tsx": "latest",
+    "typescript": "latest",
+    "vitest": "^2.1.8"
+  },
+  "optionalDependencies": {
+    "@rolldown/binding-darwin-arm64": "^1.0.3"
+  }
+}

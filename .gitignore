@@ -1,0 +1,8 @@
+node_modules/
+dist/
+config.json
+.campaign/
+.DS_Store
+*.log
+.env
+.planning/research/
