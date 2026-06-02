@@ -12,11 +12,10 @@ The agent must translate complex campaign creative direction into precise, optim
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] **Analyze Campaign Documentation**: Parse and analyze campaign creative documentation, art direction, moodboards, and inspiration. (Validated in Phase 1: Foundation & Analysis)
 
 ### Active
 
-- [ ] **Analyze Campaign Documentation**: Parse and analyze campaign creative documentation, art direction, moodboards, and inspiration.
 - [ ] **Generate Image Prompts**: Generate optimized image prompts for Soul V2 and Soul Cinema, starting with stylized images and including exact camera and cinematography details.
 - [ ] **Generate Image-to-Video Prompts**: Generate optimized image-to-video prompts for Seedance 2 with exact details based on script and direction.
 - [ ] **Input Checklist**: Ensure all required inputs (such as moodboards and colors for Soul Cinema and Soul V2) are prompted to the user in a document and listed as a to-do list.
@@ -30,6 +29,8 @@ The agent must translate complex campaign creative direction into precise, optim
 
 The agent is intended to be a specialized tool for creative teams, similar in function to GSD but focused on the visual campaign execution pipeline. It bridges the gap between creative direction and technical prompt engineering.
 
+**Current State**: Phase 1 complete. MCP backbone established with Stdio transport. Creative ingestion pipeline implemented using IBM Docling for PDF/PPTX and direct Markdown parsing. Structured briefs are extracted via Vercel AI SDK and persisted locally in `.campaign/`.
+
 ## Constraints
 
 - **Platform**: Must run on Claude Code and/or Gemini CLI — To ensure compatibility with modern developer-centric AI tools.
@@ -39,13 +40,16 @@ The agent is intended to be a specialized tool for creative teams, similar in fu
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Initial Workflow | Follow the 4-step creative-to-prompt pipeline specified in the idea. | — Pending |
+| MCP Stdio | Standard compatibility with Claude Code/Gemini CLI without local server. | Implemented |
+| IBM Docling | High-fidelity parsing of PDF and PPTX creative decks. | Implemented |
+| Vercel AI SDK v6 | Standardized structured output extraction from documents. | Implemented |
+| Local Persistence | Store briefs in `.campaign/` JSON files for project isolation. | Implemented |
 
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
 
-**After each phase transition** (via `/gsd-transition`):
+**After each phase transition** (via `/gsd:execute-phase`):
 1. Requirements invalidated? → Move to Out of Scope with reason
 2. Requirements validated? → Move to Validated with phase reference
 3. New requirements emerged? → Add to Active
@@ -59,4 +63,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: June 2, 2026 after initialization*
+*Last updated: June 2, 2026 after Phase 1*
