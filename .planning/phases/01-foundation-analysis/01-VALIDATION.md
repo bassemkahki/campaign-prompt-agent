@@ -39,7 +39,8 @@ created: June 2, 2026
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
 | 01-01-01 | 01 | 1 | BACK-01 | T-01-SC | Manual package audit | manual | N/A | ✅ | ⬜ pending |
-| 01-01-02 | 01 | 1 | BACK-01 | — | N/A | unit | `npm test tests/setup.test.ts` | ❌ W0 | ⬜ pending |
+| 01-01-02 | 01 | 1 | BACK-01 | — | N/A | unit | `docling --version` | ✅ | ⬜ pending |
+| 01-01-03 | 01 | 1 | BACK-01 | — | N/A | integration | `npm test` | ❌ W0 | ⬜ pending |
 | 01-02-01 | 02 | 2 | BACK-02 | T-01-02 | .gitignore for secrets | unit | `npm test tests/setup.test.ts` | ❌ W0 | ⬜ pending |
 | 01-02-02 | 02 | 2 | BACK-01 | T-01-01 | MCP SDK standard transport | integration | `npm test tests/mcp.test.ts` | ❌ W0 | ⬜ pending |
 | 01-02-03 | 02 | 2 | BACK-01 | — | N/A | manual | N/A | ✅ | ⬜ pending |
