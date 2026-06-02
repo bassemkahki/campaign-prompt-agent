@@ -30,11 +30,31 @@ export class CampaignAgentServer {
   private setupHandlers() {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       return {
-        tools: [],
+        tools: [
+          {
+            name: 'ping',
+            description: 'Ping the agent to verify connectivity',
+            inputSchema: {
+              type: 'object',
+              properties: {},
+            },
+          },
+        ],
       };
     });
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
+      if (request.params.name === 'ping') {
+        const config = await this.configService.getConfig();
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `pong from ${config.projectName}`,
+            },
+          ],
+        };
+      }
       throw new Error(`Tool not found: ${request.params.name}`);
     });
   }
