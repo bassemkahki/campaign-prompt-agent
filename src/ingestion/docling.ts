@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 
 export class IngestionService {
-  async parse(filePath: string): Promise<string> {
+  async convertToMarkdown(filePath: string): Promise<string> {
     const absolutePath = path.resolve(filePath);
     const ext = path.extname(absolutePath).toLowerCase();
 

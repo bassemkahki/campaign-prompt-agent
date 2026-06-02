@@ -1,9 +1,30 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { CampaignAgentServer } from '../src/mcp/server.js';
 import fs from 'fs/promises';
 import path from 'path';
+
+vi.mock('ai', async () => {
+  const actual = await vi.importActual('ai');
+  return {
+    ...actual,
+    generateText: vi.fn().mockResolvedValue({
+      output: {
+        brand: 'Test Brand',
+        projectGoal: 'Test Goal',
+        artDirection: {
+          visualStyle: 'Modern',
+          colorPalette: ['Blue'],
+          lighting: 'Bright'
+        },
+        mood: 'Energetic',
+        constraints: [],
+        deliverables: ['soul-v2']
+      }
+    })
+  };
+});
 
 describe('Ingestion Tool', () => {
   let server: CampaignAgentServer;
@@ -12,11 +33,23 @@ describe('Ingestion Tool', () => {
   let clientTransport: InMemoryTransport;
 
   beforeEach(async () => {
+    // Create a dummy config.json
+    await fs.writeFile(path.join(process.cwd(), 'config.json'), JSON.stringify({
+      anthropicApiKey: 'dummy-key'
+    }));
+
     server = new CampaignAgentServer();
     const [cTransport, sTransport] = InMemoryTransport.createLinkedPair();
     clientTransport = cTransport;
     serverTransport = sTransport;
     client = new Client({ name: "test-client", version: "1.0.0" }, { capabilities: {} });
+  });
+
+  afterEach(async () => {
+    try {
+      await fs.unlink(path.join(process.cwd(), 'config.json'));
+      await fs.unlink(path.join(process.cwd(), 'tests/fixtures/test.md'));
+    } catch (e) {}
   });
 
   it('should list the ingest_campaign_doc tool', async () => {
