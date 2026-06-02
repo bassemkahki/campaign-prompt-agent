@@ -1,3 +1,17 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: unknown
+last_updated: "2026-06-02T17:24:41.902Z"
+progress:
+  total_phases: 4
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
+---
+
 # Project State: Campaign Prompt Agent
 
 ## Project Reference
@@ -20,14 +34,17 @@
 ## Accumulated Context
 
 ### Decisions
+
 - **Architecture**: MCP Server using Vercel AI SDK and Docling for ingestion.
 - **Granularity**: Coarse (4 phases).
 - **Mode**: MVP.
 
 ### Todos
+
 - [ ] Initialize Phase 1 planning (`/gsd:plan-phase 1`)
 
 ### Blockers
+
 - None.
 
 ## Session Continuity
