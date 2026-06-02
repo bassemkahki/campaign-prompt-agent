@@ -9,7 +9,7 @@
 
 ### Analysis & Ingestion
 
-- [ ] **ANAL-01**: Multi-Format Creative Ingestion — Parse campaign documentation from PDF, PPTX, and Markdown formats using high-fidelity extraction (Docling recommended).
+- [x] **ANAL-01**: Multi-Format Creative Ingestion — Parse campaign documentation from PDF, PPTX, and Markdown formats using high-fidelity extraction (Docling recommended).
 - [ ] **ANAL-02**: Art Direction Synthesis — Extract key visual elements, art direction, and moodboard inspiration into a structured creative brief.
 
 ### Image Prompt Engineering
@@ -27,7 +27,7 @@
 ### Workflow & State Management
 
 - [ ] **WORK-01**: Input Checklist Generation — Automatically identify missing creative data (e.g., missing colors, Soul IDs) and generate a to-do list for the user.
-- [ ] **WORK-02**: Project-Level Isolation — Ensure all campaign data and prompts remain within the local project environment.
+- [x] **WORK-02**: Project-Level Isolation — Ensure all campaign data and prompts remain within the local project environment.
 
 ## v2 Requirements (Deferred)
 
@@ -47,7 +47,7 @@
 |--------|-------|--------|
 | BACK-01 | Phase 1 | Complete |
 | BACK-02 | Phase 1 | Complete |
-| ANAL-01 | Phase 1 | Pending |
+| ANAL-01 | Phase 1 | Complete |
 | ANAL-02 | Phase 2 | Pending |
 | IMG-01 | Phase 2 | Pending |
 | IMG-02 | Phase 2 | Pending |
@@ -56,4 +56,4 @@
 | VID-02 | Phase 3 | Pending |
 | VID-03 | Phase 3 | Pending |
 | WORK-01 | Phase 4 | Pending |
-| WORK-02 | Phase 1 | Pending |
+| WORK-02 | Phase 1 | Complete |
