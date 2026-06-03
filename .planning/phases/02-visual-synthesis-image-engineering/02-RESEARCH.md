@@ -155,10 +155,10 @@ const prompt = `${shot.shotType} of ${shot.subject}, ${shot.action}. ${shot.envi
 | A1 | Vercel AI SDK handles `ai/anthropic` latest versions without conflicts. | Standard Stack | Build failure if version mismatch. |
 | A2 | Soul Cinema's technical vocabulary significantly improves output over descriptive text. | Summary | Prompts may be "too technical" for the model if its weights aren't gear-specific. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Shot Density:** How many shots are typically in a campaign brief? (Recommendation: Default to extraction, but cap at 10 shots per ingestion if brief is massive).
-2. **Negative Prompts:** Do Soul V2/Cinema require specific negative prompts (e.g., "deformed," "cartoonish")? (Research suggests Soul V2 is high-fidelity enough to not need them, but they should be optional in schema).
+1. **Shot Density:** How many shots are typically in a campaign brief? **Resolution:** We will implement a system-level cap of **10 shots** per campaign brief to avoid LLM context bloat.
+2. **Negative Prompts:** Do Soul V2/Cinema require specific negative prompts (e.g., "deformed," "cartoonish")? **Resolution:** While both models are high-fidelity, we will include an **optional** `negativePrompt` field in the `PromptSchema` to allow for surgical exclusions if needed. Default will be empty.
 
 ## Environment Availability
 
