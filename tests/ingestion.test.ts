@@ -1,27 +1,40 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { CampaignAgentServer } from '../src/mcp/server.js';
 import fs from 'fs/promises';
 import path from 'path';
 
-vi.mock('ai', async () => {
-  const actual = await vi.importActual('ai');
+vi.mock('../src/services/synthesis.js', () => {
   return {
-    ...actual,
-    generateText: vi.fn().mockResolvedValue({
-      output: {
-        brand: 'Test Brand',
-        projectGoal: 'Test Goal',
-        artDirection: {
-          visualStyle: 'Modern',
-          colorPalette: ['Blue'],
-          lighting: 'Bright'
-        },
-        mood: 'Energetic',
-        constraints: [],
-        deliverables: ['soul-v2']
-      }
+    SynthesisService: vi.fn().mockImplementation(() => {
+      return {
+        extractBrief: vi.fn().mockResolvedValue({
+          brand: 'Test Brand',
+          projectGoal: 'Test Goal',
+          artDirection: {
+            visualStyle: 'Modern',
+            colorPalette: ['Blue'],
+            lighting: 'Bright'
+          },
+          mood: 'Energetic',
+          constraints: [],
+          deliverables: ['soul-v2'],
+          shotBreakdowns: [
+            {
+              id: 'shot-1',
+              description: 'A test shot',
+              subject: 'Test Subject',
+              outfit: 'Test Outfit',
+              pose: 'Test Pose',
+              environment: 'Test Environment',
+              camera: 'Test Camera',
+              lens: 'Test Lens',
+              shotType: 'Test Shot Type'
+            }
+          ]
+        })
+      };
     })
   };
 });
@@ -35,7 +48,8 @@ describe('Ingestion Tool', () => {
   beforeEach(async () => {
     // Create a dummy config.json
     await fs.writeFile(path.join(process.cwd(), 'config.json'), JSON.stringify({
-      anthropicApiKey: 'dummy-key'
+      anthropicApiKey: 'dummy-key',
+      projectName: 'Test Project'
     }));
 
     server = new CampaignAgentServer();
@@ -62,7 +76,7 @@ describe('Ingestion Tool', () => {
     expect(tools.tools.some(t => t.name === 'ingest_campaign_doc')).toBe(true);
   });
 
-  it('should ingest a markdown file', async () => {
+  it('should ingest a markdown file and report shots', async () => {
     await Promise.all([
       server.connect(serverTransport),
       client.connect(clientTransport)
@@ -79,5 +93,7 @@ describe('Ingestion Tool', () => {
     });
 
     expect(result.isError).toBeFalsy();
+    const textContent = result.content[0].text;
+    expect(textContent).toContain('Brief extracted with 1 shots');
   });
 });

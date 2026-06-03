@@ -7,9 +7,7 @@ import {
 import { ConfigService } from '../services/config.js';
 import { IngestionService } from '../ingestion/docling.js';
 import { StorageService } from '../services/storage.js';
-import { CreativeBriefSchema } from '../schema/brief.ts';
-import { generateText, Output } from 'ai';
-import { anthropic } from '@ai-sdk/anthropic';
+import { SynthesisService } from '../services/synthesis.js';
 import path from 'path';
 
 export class CampaignAgentServer {
@@ -17,11 +15,13 @@ export class CampaignAgentServer {
   private configService: ConfigService;
   private ingestionService: IngestionService;
   private storageService: StorageService;
+  private synthesisService: SynthesisService;
 
   constructor() {
     this.configService = new ConfigService();
     this.ingestionService = new IngestionService();
     this.storageService = new StorageService();
+    this.synthesisService = new SynthesisService();
     this.server = new Server(
       {
         name: 'campaign-prompt-agent',
@@ -92,33 +92,21 @@ export class CampaignAgentServer {
           // 1. Parse document to Markdown
           const markdown = await this.ingestionService.convertToMarkdown(docPath);
 
-          // 2. Extract structured brief using AI SDK
-          const config = await this.configService.getConfig();
-          if (!config.anthropicApiKey) {
-            throw new Error('Anthropic API key not found in config.json');
-          }
-
-          const { output: brief } = await generateText({
-            model: anthropic('claude-3-5-sonnet-latest', {
-              apiKey: config.anthropicApiKey,
-            }),
-            output: Output.object({ schema: CreativeBriefSchema }),
-            prompt: `Analyze the following campaign creative documentation and extract a structured creative brief.
-            
-            Markdown Content:
-            ${markdown}`,
-          });
+          // 2. Extract structured brief using SynthesisService
+          const brief = await this.synthesisService.extractBrief(markdown);
 
           // 3. Persist to storage
           await this.storageService.ensureStorage();
           const briefId = path.basename(docPath, path.extname(docPath));
           await this.storageService.saveBrief(briefId, brief);
 
+          const shotCount = brief.shotBreakdowns?.length || 0;
+
           return {
             content: [
               {
                 type: 'text',
-                text: `Successfully ingested ${path.basename(docPath)}. Brief extracted and saved as ${briefId}.json`,
+                text: `Successfully ingested ${path.basename(docPath)}. Brief extracted with ${shotCount} shots and saved as ${briefId}.json`,
               },
               {
                 type: 'text',
@@ -143,6 +131,7 @@ export class CampaignAgentServer {
       }
     });
   }
+
 
   async connect(transport: any) {
     await this.server.connect(transport);
