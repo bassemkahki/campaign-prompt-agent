@@ -73,7 +73,19 @@
   2. User can specify motion energy and receive prompts with corresponding motion directing details (e.g., Dolly, Orbit).
   3. User can verify that video prompts maintain the character/style identity from the source image prompts.
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+**Wave 1**
+
+- [ ] 03-01-PLAN.md — Schema & Service Foundation.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 03-02-PLAN.md — Motion & Hybrid Logic.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 03-03-PLAN.md — MCP Integration & Validation.
 
 ### Phase 4: Workflow Optimization
 
@@ -94,5 +106,5 @@
 |-------|----------------|--------|-----------|
 | 1. Foundation & Analysis | 3/3 | Complete    | 2026-06-02 |
 | 2. Visual Synthesis & Image Engineering | 3/3 | Complete   | 2026-06-03 |
-| 3. Motion & Multimodal Video | 0/0 | Not started | - |
+| 3. Motion & Multimodal Video | 0/3 | In progress | - |
 | 4. Workflow Optimization | 0/0 | Not started | - |
