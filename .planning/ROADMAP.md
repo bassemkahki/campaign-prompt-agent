@@ -19,7 +19,8 @@
 
   1. User can install the agent in a local folder and confirm it is connected to Claude Code/Gemini CLI via MCP.
   2. User can provide a campaign brief (PDF or Markdown) and receive a confirmation that the data was extracted.
-  3. User can verify that campaign data is stored and processed locally within the project folder.**Plans**: 3 plans
+  3. User can verify that campaign data is stored and processed locally within the project folder.
+**Plans**: 3 plans
 
 **Wave 1**
 
@@ -45,7 +46,19 @@
   2. User can generate stylized prompts for Soul V2 that include specific subject, outfit, and camera details.
   3. User can generate cinematic prompts for Soul Cinema that specify lighting and cinematography.
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+**Wave 1**
+
+- [ ] 02-01-PLAN.md — Shot Synthesis & Schema extension.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 02-02-PLAN.md — Soul V2 Prompt Engineering implementation.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 02-03-PLAN.md — Soul Cinema & Technical Consistency.
 
 ### Phase 3: Motion & Multimodal Video
 
@@ -79,6 +92,6 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Analysis | 3/3 | Complete    | 2026-06-02 |
-| 2. Visual Synthesis & Image Engineering | 0/0 | Not started | - |
+| 2. Visual Synthesis & Image Engineering | 0/3 | In Progress | - |
 | 3. Motion & Multimodal Video | 0/0 | Not started | - |
 | 4. Workflow Optimization | 0/0 | Not started | - |
