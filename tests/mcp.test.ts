@@ -39,4 +39,14 @@ describe('MCP Server', () => {
     // @ts-ignore
     expect(result.content[0].text).toContain('pong');
   });
+
+  it('should list the generate_soul_v2_prompt tool', async () => {
+    await Promise.all([
+      server.connect(serverTransport),
+      client.connect(clientTransport)
+    ]);
+
+    const tools = await client.listTools();
+    expect(tools.tools.some(t => t.name === 'generate_soul_v2_prompt')).toBe(true);
+  });
 });

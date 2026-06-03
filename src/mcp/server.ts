@@ -8,6 +8,7 @@ import { ConfigService } from '../services/config.js';
 import { IngestionService } from '../ingestion/docling.js';
 import { StorageService } from '../services/storage.js';
 import { SynthesisService } from '../services/synthesis.js';
+import { PromptEngineerService } from '../services/engineer.js';
 import path from 'path';
 
 export class CampaignAgentServer {
@@ -16,12 +17,14 @@ export class CampaignAgentServer {
   private ingestionService: IngestionService;
   private storageService: StorageService;
   private synthesisService: SynthesisService;
+  private engineerService: PromptEngineerService;
 
   constructor() {
     this.configService = new ConfigService();
     this.ingestionService = new IngestionService();
     this.storageService = new StorageService();
     this.synthesisService = new SynthesisService();
+    this.engineerService = new PromptEngineerService();
     this.server = new Server(
       {
         name: 'campaign-prompt-agent',
@@ -61,6 +64,24 @@ export class CampaignAgentServer {
                 },
               },
               required: ['path'],
+            },
+          },
+          {
+            name: 'generate_soul_v2_prompt',
+            description: 'Generate a stylized Soul V2 prompt for a specific shot in a campaign brief',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                briefId: {
+                  type: 'string',
+                  description: 'The ID of the brief (filename without extension)',
+                },
+                shotId: {
+                  type: 'string',
+                  description: 'The unique ID of the shot within the brief',
+                },
+              },
+              required: ['briefId', 'shotId'],
             },
           },
         ],
@@ -111,6 +132,27 @@ export class CampaignAgentServer {
               {
                 type: 'text',
                 text: JSON.stringify(brief, null, 2),
+              },
+            ],
+          };
+        }
+
+        if (name === 'generate_soul_v2_prompt') {
+          const briefId = args?.briefId as string;
+          const shotId = args?.shotId as string;
+
+          if (!briefId || !shotId) {
+            throw new Error('Missing briefId or shotId argument');
+          }
+
+          const brief = await this.storageService.getBrief(briefId);
+          const promptOutput = this.engineerService.generateSoulV2(brief, shotId);
+
+          return {
+            content: [
+              {
+                type: 'text',
+                text: promptOutput.prompt,
               },
             ],
           };
