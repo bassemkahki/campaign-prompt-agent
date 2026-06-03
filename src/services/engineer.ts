@@ -1,6 +1,12 @@
 import { CreativeBrief } from '../schema/brief';
 import { PromptOutput } from '../schema/prompt';
 
+const CINEMA_VOCAB = {
+  cameras: ["ARRI Alexa 35", "RED Komodo", "Sony Venice", "IMAX", "35mm Film", "16mm Bolex"],
+  lenses: ["Anamorphic", "Prime Lens", "24mm", "35mm", "50mm", "85mm"],
+  lighting: ["Golden Hour", "Neon Glow", "Volumetric Fog", "Rim Lighting", "Chiaroscuro"]
+};
+
 export class PromptEngineerService {
   /**
    * Generates a Soul V2 stylized prompt based on the creative brief and a specific shot.
@@ -50,5 +56,46 @@ export class PromptEngineerService {
         formula: "subject + outfit + pose + camera + lighting + style + mood"
       }
     };
+  }
+
+  /**
+   * Generates a Soul Cinema stylized prompt based on the creative brief and a specific shot.
+   * Formula: [Shot Type] of [Subject], [Action]. [Environment]. Shot on [Camera] with [Lens]. [Lighting]. [Visual Style], [Technical Style].
+   */
+  generateSoulCinema(brief: CreativeBrief, shotId: string): PromptOutput {
+    const shot = brief.shotBreakdowns.find(s => s.id === shotId);
+    
+    if (!shot) {
+      throw new Error(`Shot with ID "${shotId}" not found in creative brief.`);
+    }
+
+    const { shotType, subject, pose, environment, camera, lens, lightingOverride } = shot;
+    const { visualStyle, lighting: briefLighting } = brief.artDirection;
+
+    // Sanitize technical gear to ensure we use approved vocabulary
+    const finalCamera = this.matchVocab(camera, CINEMA_VOCAB.cameras, "ARRI Alexa 35");
+    const finalLens = this.matchVocab(lens, CINEMA_VOCAB.lenses, "35mm");
+    const finalLighting = lightingOverride || briefLighting;
+
+    // Layered Pattern: [Shot Type] of [Subject], [Action]. [Environment]. Shot on [Camera] with [Lens]. [Lighting]. [Visual Style], [Technical Style].
+    const prompt = `${shotType} of ${subject}, ${pose}. ${environment}. Shot on ${finalCamera} with ${finalLens}. ${finalLighting}. ${visualStyle}, Cinematic High Fidelity.`;
+
+    return {
+      shotId,
+      model: "soul-cinema",
+      prompt,
+      metadata: {
+        formula: "shotType + subject + action + environment + camera + lens + lighting + style + technical"
+      }
+    };
+  }
+
+  private matchVocab(input: string, vocab: string[], fallback: string): string {
+    const normalizedInput = input.toLowerCase();
+    const match = vocab.find(term => 
+      normalizedInput.includes(term.toLowerCase()) || 
+      term.toLowerCase().includes(normalizedInput)
+    );
+    return match || fallback;
   }
 }
