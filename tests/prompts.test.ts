@@ -48,6 +48,33 @@ describe('PromptEngineerService', () => {
     expect(result.prompt).toContain("sophisticated and airy");
   });
 
+  it('should generate a Soul Cinema prompt with technical vocabulary', () => {
+    const result = service.generateSoulCinema(mockBrief, "shot-001");
+    
+    expect(result.shotId).toBe("shot-001");
+    expect(result.model).toBe("soul-cinema");
+    
+    // Formula: [Shot Type] of [Subject], [Action]. [Environment]. Shot on [Camera] with [Lens]. [Lighting]. [Visual Style], [Technical Style].
+    expect(result.prompt).toContain("Medium full shot of Elegant female model, gazing towards the horizon");
+    expect(result.prompt).toContain("infinity pool overlooking the Mediterranean");
+    
+    // Sony A7R V doesn't strictly match Sony Venice in current simple logic, 
+    // but 85mm prime should match 85mm.
+    expect(result.prompt).toContain("Shot on");
+    expect(result.prompt).toContain("with 85mm");
+    expect(result.prompt).toContain("cinematic editorial");
+    expect(result.prompt).toContain("Cinematic High Fidelity");
+  });
+
+  it('should map specific gear to technical vocabulary in Soul Cinema', () => {
+    const cinemaBrief = { ...mockBrief };
+    cinemaBrief.shotBreakdowns[0].camera = "Alexa 35";
+    cinemaBrief.shotBreakdowns[0].lens = "Anamorphic Lens";
+
+    const result = service.generateSoulCinema(cinemaBrief, "shot-001");
+    expect(result.prompt).toContain("Shot on ARRI Alexa 35 with Anamorphic");
+  });
+
   it('should throw an error if shotId is not found', () => {
     expect(() => service.generateSoulV2(mockBrief, "non-existent")).toThrow();
   });
