@@ -75,7 +75,134 @@ describe('PromptEngineerService', () => {
     expect(result.prompt).toContain("Shot on ARRI Alexa 35 with Anamorphic");
   });
 
+  it('should generate a Seedance 2.0 prompt with @ImageN resolution', () => {
+    const multiShotBrief: CreativeBrief = {
+      ...mockBrief,
+      shotBreakdowns: [
+        ...mockBrief.shotBreakdowns,
+        {
+          id: "shot-002",
+          description: "Model walking by the sea",
+          subject: "Elegant female model",
+          outfit: "flowing silk azure gown",
+          pose: "walking slowly",
+          environment: "beach at sunset",
+          camera: "Sony A7R V",
+          lens: "35mm prime",
+          shotType: "Wide shot"
+        }
+      ]
+    };
+
+    const result1 = service.generateSeedance(multiShotBrief, "shot-001");
+    expect(result1.model).toBe("seedance-2");
+    expect(result1.prompt).toMatch(/^@Image1\b/);
+
+    const result2 = service.generateSeedance(multiShotBrief, "shot-002");
+    expect(result2.model).toBe("seedance-2");
+    expect(result2.prompt).toMatch(/^@Image2\b/);
+  });
+
+  it('should include visual identity and action delta in Seedance 2.0 prompt', () => {
+    const briefWithMotion: CreativeBrief = {
+      ...mockBrief,
+      shotBreakdowns: [
+        {
+          ...mockBrief.shotBreakdowns[0],
+          actionDelta: "walking towards the pool edge",
+          motionDirection: "Zoom In",
+          motionIntensity: 8
+        }
+      ]
+    };
+
+    const result = service.generateSeedance(briefWithMotion, "shot-001");
+    
+    // Formula: @ImageN [Subject], [Environment], [Style], [Mood]. [Action Delta]. -motion X -zoom Y
+    expect(result.prompt).toContain("@Image1");
+    expect(result.prompt).toContain("Elegant female model");
+    expect(result.prompt).toContain("infinity pool");
+    expect(result.prompt).toContain("cinematic editorial");
+    expect(result.prompt).toContain("sophisticated and airy");
+    expect(result.prompt).toContain("walking towards the pool edge");
+  });
+
+  it('should map motion direction and intensity to Seedance flags', () => {
+    const briefWithMotion: CreativeBrief = {
+      ...mockBrief,
+      shotBreakdowns: [
+        {
+          ...mockBrief.shotBreakdowns[0],
+          motionDirection: "Pan Left, Tilt Up, Zoom In",
+          motionIntensity: 7
+        }
+      ]
+    };
+
+    const result = service.generateSeedance(briefWithMotion, "shot-001");
+    
+    expect(result.prompt).toContain("-motion 7");
+    expect(result.prompt).toContain("-pan 7");
+    expect(result.prompt).toContain("-tilt 7");
+    expect(result.prompt).toContain("-zoom 7");
+  });
+
   it('should throw an error if shotId is not found', () => {
     expect(() => service.generateSoulV2(mockBrief, "non-existent")).toThrow();
+  });
+
+  describe('Phase 3 Integration: Seedance 2.0', () => {
+    it('should verify all Phase 3 success criteria (Identity Lock, @ImageN, Motion Energy)', () => {
+      const phase3Brief: CreativeBrief = {
+        brand: "Cyberpunk Tech",
+        projectGoal: "Product reveal",
+        artDirection: {
+          visualStyle: "neon-noir, grainy film",
+          colorPalette: ["pink", "cyan"],
+          lighting: "harsh neon flickers"
+        },
+        mood: "intense and energetic",
+        constraints: ["no daylight"],
+        deliverables: ["seedance-2"],
+        shotBreakdowns: [
+          {
+            id: "hero-shot",
+            description: "Drone flying through rainy alley",
+            subject: "High-tech drone with blinking red lights",
+            environment: "Narrow rainy alleyway with neon signs",
+            actionDelta: "dodging steam vents and power lines",
+            motionDirection: "Fast Zoom In, Tilt Down",
+            motionIntensity: 9,
+            shotType: "POV"
+          }
+        ]
+      };
+
+      const result = service.generateSeedance(phase3Brief, "hero-shot");
+
+      // 1. @ImageN (Relative Reference)
+      expect(result.prompt).toMatch(/^@Image1\b/);
+
+      // 2. Identity Lock (Consistent Subject, Environment, Style, Mood)
+      expect(result.prompt).toContain("High-tech drone with blinking red lights");
+      expect(result.prompt).toContain("Narrow rainy alleyway with neon signs");
+      expect(result.prompt).toContain("neon-noir");
+      expect(result.prompt).toContain("intense and energetic");
+
+      // 3. Action Delta (Specific Motion)
+      expect(result.prompt).toContain("dodging steam vents and power lines");
+
+      // 4. Motion Energy (Flags mapping)
+      expect(result.prompt).toContain("-motion 9");
+      expect(result.prompt).toContain("-zoom 9");
+      expect(result.prompt).toContain("-tilt 9");
+
+      // Verify overall structure
+      // Formula: @ImageN [Identity]. [Action Delta]. [Flags]
+      const parts = result.prompt.split(". ");
+      expect(parts.length).toBeGreaterThanOrEqual(2);
+      expect(parts[0]).toContain("@Image1");
+      expect(result.prompt).toMatch(/-motion 9\s-zoom 9\s-tilt 9$/);
+    });
   });
 });

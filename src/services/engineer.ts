@@ -1,5 +1,5 @@
-import { CreativeBrief } from '../schema/brief';
-import { PromptOutput } from '../schema/prompt';
+import { CreativeBrief } from '../schema/brief.js';
+import { PromptOutput } from '../schema/prompt.js';
 
 const CINEMA_VOCAB = {
   cameras: ["ARRI Alexa 35", "RED Komodo", "Sony Venice", "IMAX", "35mm Film", "16mm Bolex"],
@@ -14,7 +14,7 @@ export class PromptEngineerService {
    * Injects visual style and mood.
    */
   generateSoulV2(brief: CreativeBrief, shotId: string): PromptOutput {
-    const shot = brief.shotBreakdowns.find(s => s.id === shotId);
+    const shot = brief.shotBreakdowns.find((s: any) => s.id === shotId);
     
     if (!shot) {
       throw new Error(`Shot with ID "${shotId}" not found in creative brief.`);
@@ -63,7 +63,7 @@ export class PromptEngineerService {
    * Formula: [Shot Type] of [Subject], [Action]. [Environment]. Shot on [Camera] with [Lens]. [Lighting]. [Visual Style], [Technical Style].
    */
   generateSoulCinema(brief: CreativeBrief, shotId: string): PromptOutput {
-    const shot = brief.shotBreakdowns.find(s => s.id === shotId);
+    const shot = brief.shotBreakdowns.find((s: any) => s.id === shotId);
     
     if (!shot) {
       throw new Error(`Shot with ID "${shotId}" not found in creative brief.`);
@@ -86,6 +86,63 @@ export class PromptEngineerService {
       prompt,
       metadata: {
         formula: "shotType + subject + action + environment + camera + lens + lighting + style + technical"
+      }
+    };
+  }
+
+  /**
+   * Generates a Seedance 2.0 motion prompt using @ImageN multimodal resolution.
+   * Logic: Uses Hybrid Context + Action Delta formula and maps motion descriptions to command flags.
+   */
+  generateSeedance(brief: CreativeBrief, shotId: string): PromptOutput {
+    const index = brief.shotBreakdowns.findIndex((s: any) => s.id === shotId);
+    
+    if (index === -1) {
+      throw new Error(`Shot with ID "${shotId}" not found in creative brief.`);
+    }
+
+    const shot = brief.shotBreakdowns[index];
+    const imageRef = `@Image${index + 1}`;
+    
+    // 1. Visual Identity: Subject, Environment, Style, Mood
+    const { subject, environment, actionDelta, pose, motionIntensity, motionDirection } = shot;
+    const { visualStyle } = brief.artDirection;
+    const { mood } = brief;
+
+    const identityParts = [subject, environment, visualStyle, mood].filter(Boolean);
+    const identitySummary = identityParts.join(", ");
+
+    // 2. Action Delta: Sanitize to prevent prompt injection of command flags
+    const sanitize = (text: string) => text.replace(/\s-/g, " ");
+    const finalAction = sanitize(actionDelta || pose || "");
+
+    // 3. Command Mapping
+    const flags: string[] = [];
+    if (motionIntensity !== undefined) {
+      flags.push(`-motion ${motionIntensity}`);
+    }
+
+    if (motionDirection) {
+      const dir = sanitize(motionDirection).toLowerCase();
+      const intensityVal = motionIntensity || 5;
+      
+      // Keywords mapping with dynamic scaling
+      if (dir.includes("zoom")) flags.push(`-zoom ${intensityVal}`);
+      if (dir.includes("pan")) flags.push(`-pan ${intensityVal}`);
+      if (dir.includes("tilt")) flags.push(`-tilt ${intensityVal}`);
+    }
+
+    // Formula: @ImageN [Identity]. [Action Delta]. [Flags]
+    const promptBase = `${imageRef} ${identitySummary}. ${finalAction}.`.trim();
+    const prompt = flags.length > 0 ? `${promptBase} ${flags.join(" ")}` : promptBase;
+
+    return {
+      shotId,
+      model: "seedance-2",
+      prompt: prompt.replace(/\.\s+\./g, ".").trim(),
+      metadata: {
+        imageIndex: index + 1,
+        formula: "imageRef + identity + actionDelta + motionFlags"
       }
     };
   }

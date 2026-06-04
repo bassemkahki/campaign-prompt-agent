@@ -102,6 +102,24 @@ export class CampaignAgentServer {
               required: ['briefId', 'shotId'],
             },
           },
+          {
+            name: 'generate_seedance_prompt',
+            description: 'Generate a motion-rich Seedance 2.0 video prompt for a specific shot',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                briefId: {
+                  type: 'string',
+                  description: 'The ID of the brief (filename without extension)',
+                },
+                shotId: {
+                  type: 'string',
+                  description: 'The unique ID of the shot within the brief',
+                },
+              },
+              required: ['briefId', 'shotId'],
+            },
+          },
         ],
       };
     });
@@ -186,6 +204,27 @@ export class CampaignAgentServer {
 
           const brief = await this.storageService.getBrief(briefId);
           const promptOutput = this.engineerService.generateSoulCinema(brief, shotId);
+
+          return {
+            content: [
+              {
+                type: 'text',
+                text: promptOutput.prompt,
+              },
+            ],
+          };
+        }
+
+        if (name === 'generate_seedance_prompt') {
+          const briefId = args?.briefId as string;
+          const shotId = args?.shotId as string;
+
+          if (!briefId || !shotId) {
+            throw new Error('Missing briefId or shotId argument');
+          }
+
+          const brief = await this.storageService.getBrief(briefId);
+          const promptOutput = this.engineerService.generateSeedance(brief, shotId);
 
           return {
             content: [
