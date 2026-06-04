@@ -12,6 +12,9 @@ export const ShotBreakdownSchema = z.object({
   lens: z.string().describe("Lens type (e.g., 50mm, wide)"),
   shotType: z.string().describe("Shot framing (e.g., ECU, Wide)"),
   lightingOverride: z.string().optional().describe("Specific lighting for this shot"),
+  motionIntensity: z.number().min(1).max(10).optional().describe("Intensity of motion (1-10)"),
+  motionDirection: z.string().optional().describe("Direction of motion"),
+  actionDelta: z.string().optional().describe("Specific changes in action during the shot"),
 });
 
 export const CreativeBriefSchema = z.object({
