@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ConfigService } from '../src/services/config.js';
 import fs from 'fs/promises';
 import path from 'path';
@@ -35,15 +35,15 @@ describe('ConfigService', () => {
   it('should load values from config.json if present', async () => {
     const mockConfig = {
       projectName: 'Custom Project',
-      anthropicApiKey: 'test-key'
+      storageRoot: '.custom-campaign'
     };
-    
+
     await fs.writeFile(CONFIG_PATH, JSON.stringify(mockConfig));
-    
+
     const configService = new ConfigService();
     const config = await configService.getConfig();
-    
+
     expect(config.projectName).toBe('Custom Project');
-    expect(config.anthropicApiKey).toBe('test-key');
+    expect(config.storageRoot).toBe('.custom-campaign');
   });
 });

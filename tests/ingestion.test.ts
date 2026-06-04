@@ -1,99 +1,106 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { CampaignAgentServer } from '../src/mcp/server.js';
 import fs from 'fs/promises';
 import path from 'path';
 
-vi.mock('../src/services/synthesis.js', () => {
-  return {
-    SynthesisService: vi.fn().mockImplementation(() => {
-      return {
-        extractBrief: vi.fn().mockResolvedValue({
-          brand: 'Test Brand',
-          projectGoal: 'Test Goal',
-          artDirection: {
-            visualStyle: 'Modern',
-            colorPalette: ['Blue'],
-            lighting: 'Bright'
-          },
-          mood: 'Energetic',
-          constraints: [],
-          deliverables: ['soul-v2'],
-          shotBreakdowns: [
-            {
-              id: 'shot-1',
-              description: 'A test shot',
-              subject: 'Test Subject',
-              outfit: 'Test Outfit',
-              pose: 'Test Pose',
-              environment: 'Test Environment',
-              camera: 'Test Camera',
-              lens: 'Test Lens',
-              shotType: 'Test Shot Type'
-            }
-          ]
-        })
-      };
-    })
-  };
-});
+const FIXTURE = path.join(process.cwd(), 'tests/fixtures/ingest-test.md');
+const BRIEF_ID = 'ingest-test';
+const SAVED_BRIEF = path.join(process.cwd(), '.campaign', 'briefs', `${BRIEF_ID}.json`);
 
-describe('Ingestion Tool', () => {
-  let server: CampaignAgentServer;
-  let client: Client;
-  let serverTransport: InMemoryTransport;
-  let clientTransport: InMemoryTransport;
+const VALID_BRIEF = {
+  brand: 'Test Brand',
+  projectGoal: 'Test Goal',
+  artDirection: { visualStyle: 'Modern', colorPalette: ['Blue'], lighting: 'Bright' },
+  mood: 'Energetic',
+  constraints: [],
+  deliverables: ['soul-v2'],
+  shotBreakdowns: [
+    {
+      id: 'shot-1',
+      description: 'A test shot',
+      subject: 'Test Subject',
+      outfit: 'Test Outfit',
+      pose: 'Test Pose',
+      environment: 'Test Environment',
+      camera: 'Test Camera',
+      lens: 'Test Lens',
+      shotType: 'Test Shot Type',
+    },
+  ],
+};
 
+async function connect() {
+  const server = new CampaignAgentServer();
+  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+  const client = new Client({ name: 'test-client', version: '1.0.0' }, { capabilities: {} });
+  await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+  return client;
+}
+
+describe('Ingestion Tool (keyless two-phase)', () => {
   beforeEach(async () => {
-    // Create a dummy config.json
-    await fs.writeFile(path.join(process.cwd(), 'config.json'), JSON.stringify({
-      anthropicApiKey: 'dummy-key',
-      projectName: 'Test Project'
-    }));
-
-    server = new CampaignAgentServer();
-    const [cTransport, sTransport] = InMemoryTransport.createLinkedPair();
-    clientTransport = cTransport;
-    serverTransport = sTransport;
-    client = new Client({ name: "test-client", version: "1.0.0" }, { capabilities: {} });
+    await fs.mkdir(path.dirname(FIXTURE), { recursive: true });
+    await fs.writeFile(FIXTURE, '# Test Campaign\n\nBrand: Test Brand\n\nShot 1: A subject in a studio.');
   });
 
   afterEach(async () => {
-    try {
-      await fs.unlink(path.join(process.cwd(), 'config.json'));
-      await fs.unlink(path.join(process.cwd(), 'tests/fixtures/test.md'));
-    } catch (e) {}
+    await fs.rm(FIXTURE, { force: true }).catch(() => {});
+    await fs.rm(SAVED_BRIEF, { force: true }).catch(() => {});
   });
 
-  it('should list the ingest_campaign_doc tool', async () => {
-    await Promise.all([
-      server.connect(serverTransport),
-      client.connect(clientTransport)
-    ]);
-
+  it('lists the ingest_campaign_doc tool', async () => {
+    const client = await connect();
     const tools = await client.listTools();
-    expect(tools.tools.some(t => t.name === 'ingest_campaign_doc')).toBe(true);
+    expect(tools.tools.some((t) => t.name === 'ingest_campaign_doc')).toBe(true);
   });
 
-  it('should ingest a markdown file and report shots', async () => {
-    await Promise.all([
-      server.connect(serverTransport),
-      client.connect(clientTransport)
-    ]);
+  it('phase 1: returns extraction instructions + parsed markdown and saves nothing', async () => {
+    const client = await connect();
 
-    // Create a dummy MD file
-    const testMd = path.join(process.cwd(), 'tests/fixtures/test.md');
-    await fs.mkdir(path.dirname(testMd), { recursive: true });
-    await fs.writeFile(testMd, '# Test Campaign\nBrand: Test Brand');
-
-    const result = await client.callTool({ 
-      name: 'ingest_campaign_doc', 
-      arguments: { path: testMd } 
+    const result: any = await client.callTool({
+      name: 'ingest_campaign_doc',
+      arguments: { path: FIXTURE },
     });
 
     expect(result.isError).toBeFalsy();
-    const textContent = result.content[0].text;
-    expect(textContent).toContain('Brief extracted with 1 shots');
+    const joined = result.content.map((c: any) => c.text).join('\n');
+    expect(joined).toContain('ingest_campaign_doc'); // instructions reference the save step
+    expect(joined).toContain('shotBreakdowns'); // schema skeleton present
+    expect(joined).toContain('PARSED DOCUMENT'); // markdown handed back
+    expect(joined).toContain('Test Campaign'); // the actual document content
+
+    // Phase 1 must not persist a brief.
+    const exists = await fs.stat(SAVED_BRIEF).then(() => true).catch(() => false);
+    expect(exists).toBe(false);
+  });
+
+  it('phase 2: validates and saves the supplied brief', async () => {
+    const client = await connect();
+
+    const result: any = await client.callTool({
+      name: 'ingest_campaign_doc',
+      arguments: { path: FIXTURE, brief: VALID_BRIEF },
+    });
+
+    expect(result.isError).toBeFalsy();
+    expect(result.content[0].text).toContain('Brief saved with 1 shot');
+
+    const saved = JSON.parse(await fs.readFile(SAVED_BRIEF, 'utf-8'));
+    expect(saved.brand).toBe('Test Brand');
+    expect(saved.shotBreakdowns).toHaveLength(1);
+  });
+
+  it('phase 2: rejects a structurally invalid brief', async () => {
+    const client = await connect();
+    const { brand, ...invalid } = VALID_BRIEF as any;
+
+    const result: any = await client.callTool({
+      name: 'ingest_campaign_doc',
+      arguments: { path: FIXTURE, brief: invalid },
+    });
+
+    expect(result.isError).toBe(true);
   });
 });

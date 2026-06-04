@@ -2,11 +2,10 @@ import fs from 'fs/promises';
 import path from 'path';
 import { z } from 'zod';
 
+// The agent runs inside a host CLI (Claude Code / Gemini CLI) and delegates all
+// model reasoning to that host, so no API keys are needed or read here.
 export const ConfigSchema = z.object({
   projectName: z.string().default('Campaign Prompt Agent'),
-  anthropicApiKey: z.string().optional(),
-  openaiApiKey: z.string().optional(),
-  googleApiKey: z.string().optional(),
   storageRoot: z.string().default('.campaign'),
 });
 
@@ -28,21 +27,7 @@ export class ConfigService {
       // If file doesn't exist or is invalid, use empty object to trigger defaults
     }
 
-    const config = ConfigSchema.parse(json);
-
-    // Fallback to environment variables
-    config.anthropicApiKey = config.anthropicApiKey || 
-      process.env.ANTHROPIC_API_KEY || 
-      process.env.CLAUDE_API_KEY;
-    
-    config.googleApiKey = config.googleApiKey || 
-      process.env.GOOGLE_API_KEY || 
-      process.env.GEMINI_API_KEY;
-    
-    config.openaiApiKey = config.openaiApiKey || 
-      process.env.OPENAI_API_KEY;
-
-    return config;
+    return ConfigSchema.parse(json);
   }
 
   async saveConfig(config: Partial<Config>): Promise<void> {

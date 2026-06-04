@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Phase 4 shipped — PR #1
-last_updated: "2026-06-04T12:30:00.000Z"
+status: Phase 5 shipped — keyless host-delegation
+last_updated: "2026-06-04T14:10:00.000Z"
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 10
-  completed_plans: 10
+  total_phases: 5
+  completed_phases: 5
+  total_plans: 11
+  completed_plans: 11
   percent: 100
 ---
 
@@ -21,22 +21,23 @@ progress:
 
 ## Current Position
 
-Phase: 4
-Plan: 04-01-PLAN.md
-**Phase**: 4 - Workflow Optimization
+Phase: 5
+Plan: 05-keyless-host-delegation
+**Phase**: 5 - Keyless Host-Delegation
 **Status**: Complete
 **Progress**: [████████████████████] 100%
 
 ## Performance Metrics
 
 - **Requirement Coverage**: 100% (15/15 v1 requirements mapped)
-- **Phase Completion**: 4/4
+- **Phase Completion**: 5/5
 
 ## Accumulated Context
 
 ### Decisions
 
-- **Architecture**: MCP Server using Vercel AI SDK and Docling for ingestion.
+- **Architecture**: MCP Server with Docling for ingestion; deterministic validation + prompt engineering.
+- **Keyless**: Removed the Vercel AI SDK / API keys. Synthesis is delegated to the host CLI's own model via a two-phase `ingest_campaign_doc` (parse → host synthesizes → validate & save).
 - **Validation**: Added `ValidationService` to identify missing colors and Soul IDs.
 - **UX**: Warnings prepended to prompt outputs when brief is incomplete.
 
@@ -52,5 +53,5 @@ Plan: 04-01-PLAN.md
 
 ## Session Continuity
 
-- **Last Session**: Shipped Phase 4 (Workflow Optimization).
-- **Next Step**: Finalize and prepare for release.
+- **Last Session**: Shipped Phase 5 (Keyless Host-Delegation) — the agent is keyless and installable/invokable on both Claude Code and Gemini CLI.
+- **Next Step**: Open PR and merge.

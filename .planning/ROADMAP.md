@@ -6,6 +6,7 @@
 - [x] **Phase 2: Visual Synthesis & Image Engineering** - Transform creative direction into optimized image prompts. (completed 2026-06-03)
 - [x] **Phase 3: Motion & Multimodal Video** - Create cinematic motion prompts with visual consistency. (completed 2026-06-03)
 - [x] **Phase 4: Workflow Optimization** - Ensure production readiness and input validation. (completed 2026-06-04)
+- [x] **Phase 5: Keyless Host-Delegation** - Remove API keys; delegate synthesis to the host CLI model; fix install/invocation on Claude Code + Gemini CLI. (completed 2026-06-04)
 
 ## Phase Details
 

@@ -58,13 +58,19 @@ export class CampaignAgentServer {
           },
           {
             name: 'ingest_campaign_doc',
-            description: 'Ingest PDF/PPTX/MD campaign documentation and extract a creative brief',
+            description:
+              'Keyless two-phase ingestion. Call with `path` only to parse a PDF/PPTX/MD document and receive extraction instructions plus the parsed Markdown; YOU (the host model) then synthesize a creative brief and call this tool again with the same `path` plus that `brief` object to validate and save it.',
             inputSchema: {
               type: 'object',
               properties: {
                 path: {
                   type: 'string',
                   description: 'Local path to the campaign document',
+                },
+                brief: {
+                  type: 'object',
+                  description:
+                    'Phase 2 only: the structured creative brief you synthesized from the parsed Markdown. Omit on the first call.',
                 },
               },
               required: ['path'],
@@ -164,28 +170,48 @@ export class CampaignAgentServer {
             throw new Error('Missing path argument');
           }
 
-          // 1. Parse document to Markdown
-          const markdown = await this.ingestionService.convertToMarkdown(docPath);
-
-          // 2. Extract structured brief using SynthesisService
-          const brief = await this.synthesisService.extractBrief(markdown);
-
-          // 3. Persist to storage
-          await this.storageService.ensureStorage();
           const briefId = path.basename(docPath, path.extname(docPath));
-          await this.storageService.saveBrief(briefId, brief);
 
-          const shotCount = brief.shotBreakdowns?.length || 0;
+          // Phase 2: a structured brief was supplied by the host model — validate and persist.
+          if (args?.brief !== undefined) {
+            const brief = this.synthesisService.validateBrief(args.brief);
+
+            await this.storageService.ensureStorage();
+            await this.storageService.saveBrief(briefId, brief);
+
+            const shotCount = brief.shotBreakdowns?.length || 0;
+            const shotList = (brief.shotBreakdowns || [])
+              .map((s: any) => `  - ${s.id}: ${s.subject || 'shot'}`)
+              .join('\n');
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Successfully ingested ${path.basename(docPath)}. Brief saved with ${shotCount} shot(s) as ${briefId}.json${shotList ? `\n\nShots:\n${shotList}` : ''}`,
+                },
+                {
+                  type: 'text',
+                  text: JSON.stringify(brief, null, 2),
+                },
+              ],
+            };
+          }
+
+          // Phase 1: parse the document, then hand the content + extraction instructions
+          // to the host CLI's model (which performs the synthesis — no API key required).
+          const markdown = await this.ingestionService.convertToMarkdown(docPath);
+          const instructions = this.synthesisService.buildExtractionInstructions();
 
           return {
             content: [
               {
                 type: 'text',
-                text: `Successfully ingested ${path.basename(docPath)}. Brief extracted with ${shotCount} shots and saved as ${briefId}.json`,
+                text: `Parsed ${path.basename(docPath)} (brief id: "${briefId}").\n\n${instructions}`,
               },
               {
                 type: 'text',
-                text: JSON.stringify(brief, null, 2),
+                text: `--- PARSED DOCUMENT (Markdown) ---\n\n${markdown}`,
               },
             ],
           };

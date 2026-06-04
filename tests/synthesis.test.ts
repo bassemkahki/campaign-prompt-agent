@@ -1,90 +1,90 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { SynthesisService } from '../src/services/synthesis';
-import { ConfigService } from '../src/services/config';
 
-// Mock ConfigService
-vi.mock('../src/services/config', () => {
+function makeShot(overrides: Record<string, any> = {}) {
   return {
-    ConfigService: vi.fn().mockImplementation(() => {
-      return {
-        getConfig: vi.fn().mockResolvedValue({
-          anthropicApiKey: 'fake-api-key',
-        }),
-      };
-    }),
+    id: 'shot-1',
+    description: 'A person standing on a mountain',
+    subject: 'Person',
+    outfit: 'Hiking gear',
+    pose: 'Standing tall',
+    environment: 'Mountain top',
+    camera: 'Eye level',
+    lens: '35mm',
+    shotType: 'Wide',
+    ...overrides,
   };
-});
+}
 
-// Mock AI SDK
-vi.mock('ai', () => {
+function makeBrief(shots: any[]) {
   return {
-    generateText: vi.fn().mockResolvedValue({
-      output: {
-        brand: 'Test Brand',
-        projectGoal: 'Test Goal',
-        artDirection: {
-          visualStyle: 'Modern',
-          colorPalette: ['Blue'],
-          lighting: 'Bright',
-        },
-        mood: 'Energetic',
-        constraints: [],
-        deliverables: ['soul-v2'],
-        shotBreakdowns: [
-          {
-            id: 'shot-1',
-            description: 'A person standing on a mountain',
-            subject: 'Person',
-            outfit: 'Hiking gear',
-            pose: 'Standing tall',
-            environment: 'Mountain top',
-            camera: 'Eye level',
-            lens: '35mm',
-            shotType: 'Wide',
-          }
-        ],
-      },
-    }),
-    Output: {
-      object: vi.fn().mockReturnValue({}),
+    brand: 'Test Brand',
+    projectGoal: 'Test Goal',
+    artDirection: {
+      visualStyle: 'Modern',
+      colorPalette: ['Blue'],
+      lighting: 'Bright',
     },
+    mood: 'Energetic',
+    constraints: [],
+    deliverables: ['soul-v2'],
+    shotBreakdowns: shots,
   };
-});
+}
 
-describe('SynthesisService', () => {
-  it('should extract a brief with shot breakdowns from markdown', async () => {
-    const service = new SynthesisService();
-    const markdown = '# Creative Brief\n\nBrand: Test Brand\n\nShot 1: A person standing on a mountain wearing hiking gear.';
-    
-    const brief = await service.extractBrief(markdown);
-    
-    expect(brief.brand).toBe('Test Brand');
-    expect(brief.shotBreakdowns).toBeDefined();
-    expect(brief.shotBreakdowns.length).toBeGreaterThan(0);
-    expect(brief.shotBreakdowns[0].subject).toBe('Person');
+describe('SynthesisService (keyless)', () => {
+  describe('buildExtractionInstructions', () => {
+    it('returns guidance that names the shot fields, the cap, the schema, and the save step', () => {
+      const service = new SynthesisService();
+      const text = service.buildExtractionInstructions();
+
+      expect(text.length).toBeGreaterThan(0);
+      expect(text).toContain('subject');
+      expect(text).toContain('shotBreakdowns');
+      expect(text).toContain(String(SynthesisService.MAX_SHOTS));
+      expect(text).toContain('ingest_campaign_doc');
+    });
   });
 
-  it('should return empty shotBreakdowns if no shots are found', async () => {
-    const { generateText } = await import('ai');
-    (generateText as any).mockResolvedValueOnce({
-      output: {
-        brand: 'No Shots Brand',
-        projectGoal: 'Test Goal',
-        artDirection: {
-          visualStyle: 'Modern',
-          colorPalette: ['Blue'],
-          lighting: 'Bright',
-        },
-        mood: 'Energetic',
-        constraints: [],
-        deliverables: ['soul-v2'],
-        shotBreakdowns: [],
-      },
+  describe('validateBrief', () => {
+    it('parses a valid brief with shot breakdowns', () => {
+      const service = new SynthesisService();
+      const brief = service.validateBrief(makeBrief([makeShot()]));
+
+      expect(brief.brand).toBe('Test Brand');
+      expect(brief.shotBreakdowns).toHaveLength(1);
+      expect(brief.shotBreakdowns[0].subject).toBe('Person');
     });
 
-    const service = new SynthesisService();
-    const brief = await service.extractBrief('Just some text without shots.');
-    
-    expect(brief.shotBreakdowns).toEqual([]);
+    it('caps shotBreakdowns at MAX_SHOTS', () => {
+      const service = new SynthesisService();
+      const shots = Array.from({ length: 12 }, (_, i) => makeShot({ id: `shot-${i + 1}` }));
+      const brief = service.validateBrief(makeBrief(shots));
+
+      expect(brief.shotBreakdowns).toHaveLength(SynthesisService.MAX_SHOTS);
+    });
+
+    it('backfills a stable id when a shot is missing one', () => {
+      const service = new SynthesisService();
+      const shotWithoutId = makeShot();
+      delete (shotWithoutId as any).id;
+
+      const brief = service.validateBrief(makeBrief([shotWithoutId]));
+      expect(brief.shotBreakdowns[0].id).toBe('shot-1');
+    });
+
+    it('throws on a structurally invalid brief', () => {
+      const service = new SynthesisService();
+      // Missing required `brand`
+      const invalid: any = makeBrief([makeShot()]);
+      delete invalid.brand;
+
+      expect(() => service.validateBrief(invalid)).toThrow();
+    });
+
+    it('throws when nothing is provided', () => {
+      const service = new SynthesisService();
+      expect(() => service.validateBrief(undefined)).toThrow();
+    });
   });
 });
