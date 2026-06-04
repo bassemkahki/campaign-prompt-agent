@@ -75,6 +75,34 @@ describe('PromptEngineerService', () => {
     expect(result.prompt).toContain("Shot on ARRI Alexa 35 with Anamorphic");
   });
 
+  it('should generate a Seedance 2.0 prompt with @ImageN resolution', () => {
+    const multiShotBrief: CreativeBrief = {
+      ...mockBrief,
+      shotBreakdowns: [
+        ...mockBrief.shotBreakdowns,
+        {
+          id: "shot-002",
+          description: "Model walking by the sea",
+          subject: "Elegant female model",
+          outfit: "flowing silk azure gown",
+          pose: "walking slowly",
+          environment: "beach at sunset",
+          camera: "Sony A7R V",
+          lens: "35mm prime",
+          shotType: "Wide shot"
+        }
+      ]
+    };
+
+    const result1 = service.generateSeedance(multiShotBrief, "shot-001");
+    expect(result1.model).toBe("seedance-2");
+    expect(result1.prompt).toMatch(/^@Image1\b/);
+
+    const result2 = service.generateSeedance(multiShotBrief, "shot-002");
+    expect(result2.model).toBe("seedance-2");
+    expect(result2.prompt).toMatch(/^@Image2\b/);
+  });
+
   it('should throw an error if shotId is not found', () => {
     expect(() => service.generateSoulV2(mockBrief, "non-existent")).toThrow();
   });
