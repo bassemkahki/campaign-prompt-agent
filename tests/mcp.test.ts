@@ -59,4 +59,14 @@ describe('MCP Server', () => {
     const tools = await client.listTools();
     expect(tools.tools.some(t => t.name === 'generate_cinema_prompt')).toBe(true);
   });
+
+  it('should list the check_campaign_readiness tool', async () => {
+    await Promise.all([
+      server.connect(serverTransport),
+      client.connect(clientTransport)
+    ]);
+
+    const tools = await client.listTools();
+    expect(tools.tools.some(t => t.name === 'check_campaign_readiness')).toBe(true);
+  });
 });

@@ -3,5 +3,6 @@
   "anthropicApiKey": "YOUR_ANTHROPIC_API_KEY",
   "openaiApiKey": "YOUR_OPENAI_API_KEY",
   "googleApiKey": "YOUR_GOOGLE_API_KEY",
-  "storageRoot": ".campaign"
+  "storageRoot": ".campaign",
+  "_note": "API keys can also be provided via environment variables: ANTHROPIC_API_KEY, GOOGLE_API_KEY, OPENAI_API_KEY"
 }

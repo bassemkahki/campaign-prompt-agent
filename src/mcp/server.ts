@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -9,6 +10,7 @@ import { IngestionService } from '../ingestion/docling.js';
 import { StorageService } from '../services/storage.js';
 import { SynthesisService } from '../services/synthesis.js';
 import { PromptEngineerService } from '../services/engineer.js';
+import { ValidationService } from '../services/validation.js';
 import path from 'path';
 
 export class CampaignAgentServer {
@@ -18,6 +20,7 @@ export class CampaignAgentServer {
   private storageService: StorageService;
   private synthesisService: SynthesisService;
   private engineerService: PromptEngineerService;
+  private validationService: ValidationService;
 
   constructor() {
     this.configService = new ConfigService();
@@ -25,6 +28,7 @@ export class CampaignAgentServer {
     this.storageService = new StorageService();
     this.synthesisService = new SynthesisService();
     this.engineerService = new PromptEngineerService();
+    this.validationService = new ValidationService();
     this.server = new Server(
       {
         name: 'campaign-prompt-agent',
@@ -64,6 +68,20 @@ export class CampaignAgentServer {
                 },
               },
               required: ['path'],
+            },
+          },
+          {
+            name: 'check_campaign_readiness',
+            description: 'Check if a campaign brief has all critical data for high-quality generation',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                briefId: {
+                  type: 'string',
+                  description: 'The ID of the brief (filename without extension)',
+                },
+              },
+              required: ['briefId'],
             },
           },
           {
@@ -173,6 +191,26 @@ export class CampaignAgentServer {
           };
         }
 
+        if (name === 'check_campaign_readiness') {
+          const briefId = args?.briefId as string;
+          if (!briefId) {
+            throw new Error('Missing briefId argument');
+          }
+
+          const brief = await this.storageService.getBrief(briefId);
+          const report = this.validationService.checkReadiness(brief);
+          const checklist = this.validationService.formatChecklist(report);
+
+          return {
+            content: [
+              {
+                type: 'text',
+                text: checklist,
+              },
+            ],
+          };
+        }
+
         if (name === 'generate_soul_v2_prompt') {
           const briefId = args?.briefId as string;
           const shotId = args?.shotId as string;
@@ -182,13 +220,19 @@ export class CampaignAgentServer {
           }
 
           const brief = await this.storageService.getBrief(briefId);
+          const report = this.validationService.checkReadiness(brief);
           const promptOutput = this.engineerService.generateSoulV2(brief, shotId);
+
+          let finalPrompt = promptOutput.prompt;
+          if (!report.isReady) {
+            finalPrompt = `⚠️ WARNING: Missing critical data. Run check_campaign_readiness for details.\n\n${finalPrompt}`;
+          }
 
           return {
             content: [
               {
                 type: 'text',
-                text: promptOutput.prompt,
+                text: finalPrompt,
               },
             ],
           };
@@ -203,13 +247,19 @@ export class CampaignAgentServer {
           }
 
           const brief = await this.storageService.getBrief(briefId);
+          const report = this.validationService.checkReadiness(brief);
           const promptOutput = this.engineerService.generateSoulCinema(brief, shotId);
+
+          let finalPrompt = promptOutput.prompt;
+          if (!report.isReady) {
+            finalPrompt = `⚠️ WARNING: Missing critical data. Run check_campaign_readiness for details.\n\n${finalPrompt}`;
+          }
 
           return {
             content: [
               {
                 type: 'text',
-                text: promptOutput.prompt,
+                text: finalPrompt,
               },
             ],
           };
@@ -224,13 +274,19 @@ export class CampaignAgentServer {
           }
 
           const brief = await this.storageService.getBrief(briefId);
+          const report = this.validationService.checkReadiness(brief);
           const promptOutput = this.engineerService.generateSeedance(brief, shotId);
+
+          let finalPrompt = promptOutput.prompt;
+          if (!report.isReady) {
+            finalPrompt = `⚠️ WARNING: Missing critical data. Run check_campaign_readiness for details.\n\n${finalPrompt}`;
+          }
 
           return {
             content: [
               {
                 type: 'text',
-                text: promptOutput.prompt,
+                text: finalPrompt,
               },
             ],
           };
