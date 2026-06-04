@@ -1,6 +1,6 @@
-import { generateText, Output } from 'ai';
-import { anthropic } from '@ai-sdk/anthropic';
-import { CreativeBrief, CreativeBriefSchema } from '../schema/brief.ts';
+import { generateObject } from 'ai';
+import { createAnthropic } from '@ai-sdk/anthropic';
+import { CreativeBrief, CreativeBriefSchema } from '../schema/brief.js';
 import { ConfigService } from './config.js';
 
 export class SynthesisService {
@@ -13,14 +13,16 @@ export class SynthesisService {
   async extractBrief(markdown: string): Promise<CreativeBrief> {
     const config = await this.configService.getConfig();
     if (!config.anthropicApiKey) {
-      throw new Error('Anthropic API key not found in config.json');
+      throw new Error('Anthropic API key not found. Please provide it in config.json or set ANTHROPIC_API_KEY environment variable.');
     }
 
-    const { output: brief } = await generateText({
-      model: anthropic('claude-3-5-sonnet-latest', {
-        apiKey: config.anthropicApiKey,
-      }),
-      output: Output.object({ schema: CreativeBriefSchema }),
+    const anthropic = createAnthropic({
+      apiKey: config.anthropicApiKey,
+    });
+
+    const { object: brief } = (await generateObject({
+      model: anthropic('claude-3-5-sonnet-latest'),
+      schema: CreativeBriefSchema as any,
       prompt: `Analyze the following campaign creative documentation and extract a structured creative brief.
       
       Specifically, identify individual shots or scenes mentioned in the text. For each shot, extract:
@@ -34,13 +36,17 @@ export class SynthesisService {
       
       Markdown Content:
       ${markdown}`,
-    });
+    })) as { object: CreativeBrief };
+
+    if (!brief) {
+      throw new Error('Failed to extract brief from documentation.');
+    }
 
     // Ensure we don't exceed the 10-shot cap (though the prompt asks for it, we enforce it here too)
     if (brief.shotBreakdowns && brief.shotBreakdowns.length > 10) {
       brief.shotBreakdowns = brief.shotBreakdowns.slice(0, 10);
     }
 
-    return brief;
+    return brief as CreativeBrief;
   }
 }

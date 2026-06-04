@@ -15,6 +15,7 @@ export const ShotBreakdownSchema = z.object({
   motionIntensity: z.number().min(1).max(10).optional().describe("Intensity of motion (1-10)"),
   motionDirection: z.string().optional().describe("Direction of motion"),
   actionDelta: z.string().optional().describe("Specific changes in action during the shot"),
+  soulId: z.string().optional().describe("Character identity ID (Soul ID) for character consistency"),
 });
 
 export const CreativeBriefSchema = z.object({
@@ -28,7 +29,7 @@ export const CreativeBriefSchema = z.object({
   mood: z.string().describe("Atmospheric description (e.g., 'Ethereal', 'Gritty')"),
   constraints: z.array(z.string()).describe("Any creative or technical limitations"),
   deliverables: z.array(z.enum(["soul-v2", "soul-cinema", "seedance-2"])).describe("Target platform/model for the assets"),
-  shotBreakdowns: z.array(ShotBreakdownSchema).default([]).describe("Individual shot breakdowns identified in the brief"),
+  shotBreakdowns: z.array(ShotBreakdownSchema).describe("Individual shot breakdowns identified in the brief"),
 });
 
 export type ShotBreakdown = z.infer<typeof ShotBreakdownSchema>;

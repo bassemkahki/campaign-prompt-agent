@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "type": "module",
   "description": "MCP server for creative campaign ingestion and prompt generation",
-  "main": "dist/index.js",
+  "main": "dist/mcp/server.js",
+  "bin": {
+    "campaign-agent": "dist/mcp/server.js"
+  },
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "build": "tsc",
-    "start": "tsx src/index.ts",
+    "build": "tsc && chmod +x dist/mcp/server.js",
+    "install-agent": "node install.js",
+    "start": "tsx src/mcp/server.ts",
     "mcp": "tsx src/mcp/server.ts"
   },
   "keywords": [

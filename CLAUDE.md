@@ -62,13 +62,53 @@ A high-end AI agent designed to run on Claude Code and/or Gemini CLI, installabl
 
 ## Installation
 
-### Development Environment
+### Automatic Installation (Recommended)
 
-# Core MCP Server & SDKs
+To install the Campaign Prompt Agent as a global subagent in Claude Code or Gemini CLI:
 
-# Types and Dev Tools
+1. Clone this repository.
+2. Run the installation script:
+   ```bash
+   npm run install-agent
+   ```
 
-# Document Parsing (Requires Python 3.10+)
+This script will:
+- Build the project.
+- Register the MCP server in your CLI settings.
+- Install the agent definition file (`campaign-prompt-agent.md`) so you can invoke it directly.
+
+### Usage
+
+Once installed, restart your CLI and you can invoke the agent by name:
+
+```bash
+/agent campaign-prompt-agent
+```
+
+### Local Project Installation
+
+If you prefer to install the agent only for a specific project rather than globally:
+
+1. Create a `.claude/agents/` (or `.gemini/agents/`) folder in your target project.
+2. Copy `install/campaign-prompt-agent.md` from this repo into that folder.
+3. Ensure the MCP server is registered (globally or locally in the project's `claude.json`).
+
+### Manual MCP Registration (Fallback)
+
+### Credentials
+
+By default, the agent will use credentials from your environment if they are not explicitly provided in `config.json`. It supports:
+- **Anthropic**: `ANTHROPIC_API_KEY` or `CLAUDE_API_KEY`
+- **Google**: `GOOGLE_API_KEY` or `GEMINI_API_KEY`
+- **OpenAI**: `OPENAI_API_KEY`
+
+### Local Development
+
+1. Install dependencies: `npm install`
+2. Build the project: `npm run build`
+3. (Optional) Create `config.json` from `config.template.json` if you want to use specific keys.
+4. Run locally: `npm start`
+
 
 ## What NOT to Use and Why
 

@@ -26,7 +26,7 @@
 
 ### Workflow & State Management
 
-- [ ] **WORK-01**: Input Checklist Generation — Automatically identify missing creative data (e.g., missing colors, Soul IDs) and generate a to-do list for the user.
+- [x] **WORK-01**: Input Checklist Generation — Automatically identify missing creative data (e.g., missing colors, Soul IDs) and generate a to-do list for the user.
 - [x] **WORK-02**: Project-Level Isolation — Ensure all campaign data and prompts remain within the local project environment.
 
 ## v2 Requirements (Deferred)

@@ -20,14 +20,29 @@ export class ConfigService {
   }
 
   async getConfig(): Promise<Config> {
+    let json = {};
     try {
       const data = await fs.readFile(this.configPath, 'utf-8');
-      const json = JSON.parse(data);
-      return ConfigSchema.parse(json);
+      json = JSON.parse(data);
     } catch (error) {
-      // If file doesn't exist or is invalid, return defaults
-      return ConfigSchema.parse({});
+      // If file doesn't exist or is invalid, use empty object to trigger defaults
     }
+
+    const config = ConfigSchema.parse(json);
+
+    // Fallback to environment variables
+    config.anthropicApiKey = config.anthropicApiKey || 
+      process.env.ANTHROPIC_API_KEY || 
+      process.env.CLAUDE_API_KEY;
+    
+    config.googleApiKey = config.googleApiKey || 
+      process.env.GOOGLE_API_KEY || 
+      process.env.GEMINI_API_KEY;
+    
+    config.openaiApiKey = config.openaiApiKey || 
+      process.env.OPENAI_API_KEY;
+
+    return config;
   }
 
   async saveConfig(config: Partial<Config>): Promise<void> {
