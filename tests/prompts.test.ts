@@ -150,4 +150,59 @@ describe('PromptEngineerService', () => {
   it('should throw an error if shotId is not found', () => {
     expect(() => service.generateSoulV2(mockBrief, "non-existent")).toThrow();
   });
+
+  describe('Phase 3 Integration: Seedance 2.0', () => {
+    it('should verify all Phase 3 success criteria (Identity Lock, @ImageN, Motion Energy)', () => {
+      const phase3Brief: CreativeBrief = {
+        brand: "Cyberpunk Tech",
+        projectGoal: "Product reveal",
+        artDirection: {
+          visualStyle: "neon-noir, grainy film",
+          colorPalette: ["pink", "cyan"],
+          lighting: "harsh neon flickers"
+        },
+        mood: "intense and energetic",
+        constraints: ["no daylight"],
+        deliverables: ["seedance-2"],
+        shotBreakdowns: [
+          {
+            id: "hero-shot",
+            description: "Drone flying through rainy alley",
+            subject: "High-tech drone with blinking red lights",
+            environment: "Narrow rainy alleyway with neon signs",
+            actionDelta: "dodging steam vents and power lines",
+            motionDirection: "Fast Zoom In, Tilt Down",
+            motionIntensity: 9,
+            shotType: "POV"
+          }
+        ]
+      };
+
+      const result = service.generateSeedance(phase3Brief, "hero-shot");
+
+      // 1. @ImageN (Relative Reference)
+      expect(result.prompt).toMatch(/^@Image1\b/);
+
+      // 2. Identity Lock (Consistent Subject, Environment, Style, Mood)
+      expect(result.prompt).toContain("High-tech drone with blinking red lights");
+      expect(result.prompt).toContain("Narrow rainy alleyway with neon signs");
+      expect(result.prompt).toContain("neon-noir");
+      expect(result.prompt).toContain("intense and energetic");
+
+      // 3. Action Delta (Specific Motion)
+      expect(result.prompt).toContain("dodging steam vents and power lines");
+
+      // 4. Motion Energy (Flags mapping)
+      expect(result.prompt).toContain("-motion 9");
+      expect(result.prompt).toContain("-zoom 9");
+      expect(result.prompt).toContain("-tilt 9");
+
+      // Verify overall structure
+      // Formula: @ImageN [Identity]. [Action Delta]. [Flags]
+      const parts = result.prompt.split(". ");
+      expect(parts.length).toBeGreaterThanOrEqual(2);
+      expect(parts[0]).toContain("@Image1");
+      expect(result.prompt).toMatch(/-motion 9\s-zoom 9\s-tilt 9$/);
+    });
+  });
 });

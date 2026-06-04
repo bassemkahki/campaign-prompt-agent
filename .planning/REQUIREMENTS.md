@@ -20,9 +20,9 @@
 
 ### Video Prompt Engineering
 
-- [ ] **VID-01**: Seedance 2.0 Image-to-Video Prompts — Generate prompts for Seedance 2.0 that accurately translate scripts into motion.
-- [ ] **VID-02**: Motion Directing Details — Include exact motion and cinematography details (Dolly, Orbit, etc.) based on script energy.
-- [ ] **VID-03**: Multimodal Referencing — Implement the `@mention` syntax (e.g., `@Image1`) to maintain visual identity from image to video.
+- [x] **VID-01**: Seedance 2.0 Image-to-Video Prompts — Generate prompts for Seedance 2.0 that accurately translate scripts into motion.
+- [x] **VID-02**: Motion Directing Details — Include exact motion and cinematography details (Dolly, Orbit, etc.) based on script energy.
+- [x] **VID-03**: Multimodal Referencing — Implement the `@mention` syntax (e.g., `@Image1`) to maintain visual identity from image to video.
 
 ### Workflow & State Management
 
@@ -52,8 +52,8 @@
 | IMG-01 | Phase 2 | Complete |
 | IMG-02 | Phase 2 | Complete |
 | IMG-03 | Phase 2 | Complete |
-| VID-01 | Phase 3 | Pending |
-| VID-02 | Phase 3 | Pending |
-| VID-03 | Phase 3 | Pending |
+| VID-01 | Phase 3 | Complete |
+| VID-02 | Phase 3 | Complete |
+| VID-03 | Phase 3 | Complete |
 | WORK-01 | Phase 4 | Pending |
 | WORK-02 | Phase 1 | Complete |

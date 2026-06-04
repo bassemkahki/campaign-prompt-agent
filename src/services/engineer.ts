@@ -1,5 +1,5 @@
-import { CreativeBrief } from '../schema/brief';
-import { PromptOutput } from '../schema/prompt';
+import { CreativeBrief } from '../schema/brief.js';
+import { PromptOutput } from '../schema/prompt.js';
 
 const CINEMA_VOCAB = {
   cameras: ["ARRI Alexa 35", "RED Komodo", "Sony Venice", "IMAX", "35mm Film", "16mm Bolex"],
@@ -14,7 +14,7 @@ export class PromptEngineerService {
    * Injects visual style and mood.
    */
   generateSoulV2(brief: CreativeBrief, shotId: string): PromptOutput {
-    const shot = brief.shotBreakdowns.find(s => s.id === shotId);
+    const shot = brief.shotBreakdowns.find((s: any) => s.id === shotId);
     
     if (!shot) {
       throw new Error(`Shot with ID "${shotId}" not found in creative brief.`);
@@ -63,7 +63,7 @@ export class PromptEngineerService {
    * Formula: [Shot Type] of [Subject], [Action]. [Environment]. Shot on [Camera] with [Lens]. [Lighting]. [Visual Style], [Technical Style].
    */
   generateSoulCinema(brief: CreativeBrief, shotId: string): PromptOutput {
-    const shot = brief.shotBreakdowns.find(s => s.id === shotId);
+    const shot = brief.shotBreakdowns.find((s: any) => s.id === shotId);
     
     if (!shot) {
       throw new Error(`Shot with ID "${shotId}" not found in creative brief.`);
@@ -95,7 +95,7 @@ export class PromptEngineerService {
    * Logic: Uses Hybrid Context + Action Delta formula and maps motion descriptions to command flags.
    */
   generateSeedance(brief: CreativeBrief, shotId: string): PromptOutput {
-    const index = brief.shotBreakdowns.findIndex(s => s.id === shotId);
+    const index = brief.shotBreakdowns.findIndex((s: any) => s.id === shotId);
     
     if (index === -1) {
       throw new Error(`Shot with ID "${shotId}" not found in creative brief.`);

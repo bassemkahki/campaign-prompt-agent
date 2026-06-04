@@ -123,10 +123,12 @@ const prompt = `@Image${shotIndex} ${identity} ${actionDelta} -motion ${intensit
 | A1 | Seedance 2.0 accepts `-zoom`, `-pan`, `-tilt` flags | Summary | These specific flags might be tool-dependent; may need adjustment if target API changes. |
 | A2 | `@ImageN` resolution is 1-based index | Multimodal | If Seedance expects 0-based or Shot IDs, mapping logic must be updated. |
 
-## Open Questions
+## Open Questions [RESOLVED]
 
-1. **Orbit Mapping:** Does Seedance 2.0 have a native `-orbit` flag, or should it be mapped to a combination of `-pan` and `-zoom`? (Recommendation: Keep as descriptive text until confirmed).
-2. **Action Delta Field:** Should `actionDelta` be a mandatory field for all shots, or only when `seedance-2` is a deliverable? (Recommendation: Optional, defaulting to `pose`).
+1. **Orbit Mapping:** Does Seedance 2.0 have a native `-orbit` flag, or should it be mapped to a combination of `-pan` and `-zoom`?
+    - **Resolution:** Keep as descriptive text within the prompt for now. Avoid explicit mapping to flags until native support is confirmed.
+2. **Action Delta Field:** Should `actionDelta` be a mandatory field for all shots, or only when `seedance-2` is a deliverable?
+    - **Resolution:** Optional field in the schema, defaulting to the `pose` field content if missing. This ensures backward compatibility while allowing video-specific overrides.
 
 ## Environment Availability
 
