@@ -13,12 +13,15 @@ The agent must translate complex campaign creative direction into precise, optim
 ### Validated
 
 - [x] **Analyze Campaign Documentation**: Parse and analyze campaign creative documentation, art direction, moodboards, and inspiration. (Validated in Phase 1: Foundation & Analysis)
+- [x] **Generate Image Prompts**: Generate optimized image prompts for Soul V2 and Soul Cinema with exact camera and cinematography details. (Validated in Phase 2: Visual Synthesis)
+- [x] **Generate Image-to-Video Prompts**: Generate optimized video prompts for Seedance 2 with @ImageN referencing and motion control. (Validated in Phase 3: Motion & Multimodal Video)
+- [x] **Input Checklist**: Automatically identify missing creative data and generate a readiness to-do list. (Validated in Phase 4: Workflow Optimization)
 
 ### Active
 
-- [ ] **Generate Image Prompts**: Generate optimized image prompts for Soul V2 and Soul Cinema, starting with stylized images and including exact camera and cinematography details.
-- [ ] **Generate Image-to-Video Prompts**: Generate optimized image-to-video prompts for Seedance 2 with exact details based on script and direction.
-- [ ] **Input Checklist**: Ensure all required inputs (such as moodboards and colors for Soul Cinema and Soul V2) are prompted to the user in a document and listed as a to-do list.
+- [ ] **Soul HEX Auto-Extraction**: Automatically extract color palettes (Soul HEX) from moodboard images.
+- [ ] **Identity Lock (Soul ID)**: Automated character consistency management across all campaign phases.
+- [ ] **Script Modularization**: Automatically break long scripts into 3-5 second action beats for video generation.
 
 ### Out of Scope
 
@@ -27,9 +30,9 @@ The agent must translate complex campaign creative direction into precise, optim
 
 ## Context
 
-The agent is intended to be a specialized tool for creative teams, similar in function to GSD but focused on the visual campaign execution pipeline. It bridges the gap between creative direction and technical prompt engineering.
+The agent is a specialized tool for creative teams, bridging the gap between creative direction and technical prompt engineering. It is fully integrated with Claude Code and Gemini CLI via MCP.
 
-**Current State**: Phase 1 complete. MCP backbone established with Stdio transport. Creative ingestion pipeline implemented using IBM Docling for PDF/PPTX and direct Markdown parsing. Structured briefs are extracted via Vercel AI SDK and persisted locally in `.campaign/`.
+**Current State**: v1.0 complete. The agent supports full campaign ingestion, shot synthesis, and technical prompt generation for image (Soul V2, Soul Cinema) and video (Seedance 2.0) models. It includes a validation layer to ensure campaign readiness.
 
 ## Constraints
 
@@ -44,23 +47,13 @@ The agent is intended to be a specialized tool for creative teams, similar in fu
 | IBM Docling | High-fidelity parsing of PDF and PPTX creative decks. | Implemented |
 | Vercel AI SDK v6 | Standardized structured output extraction from documents. | Implemented |
 | Local Persistence | Store briefs in `.campaign/` JSON files for project isolation. | Implemented |
+| @ImageN Syntax | 1-based relative referencing for Seedance 2.0 multimodal consistency. | Implemented |
+| Hybrid Formula | Combined identity and action deltas for optimal video prompt fidelity. | Implemented |
+| Non-blocking Validation | Warn rather than block to maintain creative flexibility. | Implemented |
 
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
 
-**After each phase transition** (via `/gsd:execute-phase`):
-1. Requirements invalidated? → Move to Out of Scope with reason
-2. Requirements validated? → Move to Validated with phase reference
-3. New requirements emerged? → Add to Active
-4. Decisions to log? → Add to Key Decisions
-5. "What This Is" still accurate? → Update if drifted
-
-**After each milestone** (via `/gsd:complete-milestone`):
-1. Full review of all sections
-2. Core Value check — still the right priority?
-3. Audit Out of Scope — reasons still valid?
-4. Update Context with current state
-
 ---
-*Last updated: June 2, 2026 after Phase 1*
+*Last updated: June 4, 2026 after v1.0 Milestone*
