@@ -103,6 +103,50 @@ describe('PromptEngineerService', () => {
     expect(result2.prompt).toMatch(/^@Image2\b/);
   });
 
+  it('should include visual identity and action delta in Seedance 2.0 prompt', () => {
+    const briefWithMotion: CreativeBrief = {
+      ...mockBrief,
+      shotBreakdowns: [
+        {
+          ...mockBrief.shotBreakdowns[0],
+          actionDelta: "walking towards the pool edge",
+          motionDirection: "Zoom In",
+          motionIntensity: 8
+        }
+      ]
+    };
+
+    const result = service.generateSeedance(briefWithMotion, "shot-001");
+    
+    // Formula: @ImageN [Subject], [Environment], [Style], [Mood]. [Action Delta]. -motion X -zoom Y
+    expect(result.prompt).toContain("@Image1");
+    expect(result.prompt).toContain("Elegant female model");
+    expect(result.prompt).toContain("infinity pool");
+    expect(result.prompt).toContain("cinematic editorial");
+    expect(result.prompt).toContain("sophisticated and airy");
+    expect(result.prompt).toContain("walking towards the pool edge");
+  });
+
+  it('should map motion direction and intensity to Seedance flags', () => {
+    const briefWithMotion: CreativeBrief = {
+      ...mockBrief,
+      shotBreakdowns: [
+        {
+          ...mockBrief.shotBreakdowns[0],
+          motionDirection: "Pan Left, Tilt Up, Zoom In",
+          motionIntensity: 7
+        }
+      ]
+    };
+
+    const result = service.generateSeedance(briefWithMotion, "shot-001");
+    
+    expect(result.prompt).toContain("-motion 7");
+    expect(result.prompt).toContain("-pan 7");
+    expect(result.prompt).toContain("-tilt 7");
+    expect(result.prompt).toContain("-zoom 7");
+  });
+
   it('should throw an error if shotId is not found', () => {
     expect(() => service.generateSoulV2(mockBrief, "non-existent")).toThrow();
   });
