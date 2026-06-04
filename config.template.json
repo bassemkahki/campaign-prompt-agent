@@ -1,8 +1,5 @@
 {
   "projectName": "Campaign Prompt Agent",
-  "anthropicApiKey": "YOUR_ANTHROPIC_API_KEY",
-  "openaiApiKey": "YOUR_OPENAI_API_KEY",
-  "googleApiKey": "YOUR_GOOGLE_API_KEY",
   "storageRoot": ".campaign",
-  "_note": "API keys can also be provided via environment variables: ANTHROPIC_API_KEY, GOOGLE_API_KEY, OPENAI_API_KEY"
+  "_note": "No API keys required. The agent runs inside your CLI (Claude Code / Gemini CLI) and uses that host's own model for synthesis. config.json is optional — defaults are used if it is absent."
 }

@@ -24,9 +24,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.81",
     "@modelcontextprotocol/sdk": "1.29.0",
-    "ai": "6.0.194",
     "commander": "15.0.0",
     "sharp": "0.33.5",
     "zod": "3.25.76",

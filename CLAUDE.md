@@ -28,14 +28,18 @@ A high-end AI agent designed to run on Claude Code and/or Gemini CLI, installabl
 | **Node.js** | v20+ | Runtime | Standard for MCP server development and local CLI tools. |
 | **TypeScript** | v5.4+ | Language | Type safety for complex prompt schemas and tool definitions. |
 | **@modelcontextprotocol/sdk** | v1.29.0 | Protocol | The industry standard for connecting AI agents to local tools/data. |
-| **Vercel AI SDK** | v6.0+ | LLM Orchestration | Best-in-class support for streaming, tool calling, and structured outputs. |
 
-### Models (via API)
+### Models (host-delegated — keyless)
 
-| Model | Provider | Role | Rationale |
-|-------|----------|------|-----------|
-| **Claude 3.5 Sonnet** | Anthropic | Lead Creative | Superior nuance for creative direction, cinematography, and "Soul" model aesthetics. |
-| **Gemini 1.5 Pro** | Google | Context Specialist | 2M token window to ingest massive campaign documentation, brand books, and research. |
+The agent does **not** call any model API or manage keys. It runs inside a host CLI and delegates
+all synthesis reasoning to that host's own model:
+
+| Host CLI | Model | Role |
+|----------|-------|------|
+| **Claude Code** | Claude (host) | Synthesizes the creative brief from the parsed document during two-phase `ingest_campaign_doc`. |
+| **Gemini CLI** | Gemini (host) | Same role when running under Gemini CLI. |
+
+All other tools (`check_campaign_readiness`, `generate_*`) are deterministic and require no model.
 
 ### Document & Visual Processing
 
@@ -97,16 +101,15 @@ If you prefer to install the agent only for a specific project rather than globa
 
 ### Credentials
 
-By default, the agent will use credentials from your environment if they are not explicitly provided in `config.json`. It supports:
-- **Anthropic**: `ANTHROPIC_API_KEY` or `CLAUDE_API_KEY`
-- **Google**: `GOOGLE_API_KEY` or `GEMINI_API_KEY`
-- **OpenAI**: `OPENAI_API_KEY`
+**None required.** The agent does not call any model API or read API keys. All synthesis is
+delegated to the host CLI's own model (Claude Code / Gemini CLI). `config.json` is optional and
+only carries `projectName` / `storageRoot`.
 
 ### Local Development
 
 1. Install dependencies: `npm install`
 2. Build the project: `npm run build`
-3. (Optional) Create `config.json` from `config.template.json` if you want to use specific keys.
+3. (Optional) Create `config.json` from `config.template.json` to customize `projectName`/`storageRoot`.
 4. Run locally: `npm start`
 
 

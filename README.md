@@ -14,6 +14,7 @@ A high-end AI agent designed for **Claude Code** and **Gemini CLI**. It transfor
     *   **Soul Cinema**: Photorealistic, technical cinematic prompts with precise lens and camera specifications.
     *   **Seedance 2.0**: High-motion video prompts with dynamic physical parameters.
 *   **Local-First & Private**: All creative briefs are stored locally within your project folder in `.campaign/`.
+*   **No API Keys**: The agent runs inside your CLI and uses that host's own model for synthesis — nothing to configure, no keys to manage.
 
 ---
 
@@ -23,12 +24,12 @@ To install the Campaign Prompt Agent locally, follow these steps:
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/campaign-prompt-agent.git
+git clone https://github.com/bassemkahki/campaign-prompt-agent.git
 cd campaign-prompt-agent
 ```
 
 ### 2. Install & Build
-Ensure you have **Node.js 18+** installed.
+Ensure you have **Node.js 20+** installed.
 ```bash
 npm install
 npm run build
@@ -36,12 +37,14 @@ npm run build
 
 ### 3. Register the Agent
 The project includes a dedicated installation script that automatically configures both Claude Code and Gemini CLI. It will:
-1. Copy the agent definition to your user agent folders (`~/.claude/agents` and `~/.gemini/agents`).
-2. Register the MCP server in your local configuration files.
+1. **Claude Code** — install the subagent definition to `~/.claude/agents/` and register the MCP server at user scope (via `claude mcp add`, falling back to `~/.claude.json`).
+2. **Gemini CLI** — install a `/campaign-prompt-agent` slash command to `~/.gemini/commands/` and register the MCP server in `~/.gemini/settings.json`.
 
 ```bash
 npm run install-agent
 ```
+
+> Restart your CLI afterwards so it picks up the new MCP server. In Claude Code you can verify with `claude mcp list`.
 
 ---
 
@@ -49,8 +52,8 @@ npm run install-agent
 
 ### Multi-CLI Support
 The agent is compatible with:
-*   **Claude Code**: Registers in `~/.claude/claude.json`.
-*   **Gemini CLI**: Registers in `~/.gemini/settings.json`.
+*   **Claude Code**: MCP server at user scope (`claude mcp add`, or `~/.claude.json`) + subagent in `~/.claude/agents/`.
+*   **Gemini CLI**: MCP server in `~/.gemini/settings.json` + `/campaign-prompt-agent` command in `~/.gemini/commands/`.
 
 ### Local Persistence
 The agent creates a `.campaign/` directory in your current project root. This folder contains:
@@ -59,44 +62,52 @@ The agent creates a `.campaign/` directory in your current project root. This fo
 
 ---
 
-## ⚙️ Configuration
+## ⚙️ How It Works (Keyless)
 
-The agent requires an AI model for document synthesis and shot extraction. You can configure this via a `config.json` file in your project root or via environment variables.
+There are **no API keys** to configure. The agent runs inside your CLI, and your CLI's own model
+(Claude in Claude Code, Gemini in Gemini CLI) performs the brief synthesis. Ingestion is a simple
+two-phase exchange handled transparently for you:
 
-### 1. Using `config.json`
-Copy the template and add your API keys:
+1. The agent calls `ingest_campaign_doc` with the document path. The MCP server parses the file
+   (PDF/PPTX via **Docling**, Markdown directly) and returns the extracted text plus an extraction
+   schema.
+2. The agent's host model reads that text, synthesizes a structured creative brief, and calls
+   `ingest_campaign_doc` again with the brief — which the server validates (Zod) and saves to
+   `.campaign/briefs/`.
+
+The remaining tools (`check_campaign_readiness`, `generate_soul_v2_prompt`,
+`generate_cinema_prompt`, `generate_seedance_prompt`) are fully deterministic.
+
+### Optional `config.json`
+A `config.json` is **not required**. If you want to customize behavior, copy the template:
 ```bash
 cp config.template.json config.json
 ```
 
 | Key | Description |
 |-----|-------------|
-| `anthropicApiKey` | Your Anthropic API key (required for Claude-based extraction). |
-| `googleApiKey` | Your Google AI (Gemini) API key. |
-| `openaiApiKey` | Your OpenAI API key. |
+| `projectName` | Display name used by the agent (default: `Campaign Prompt Agent`). |
 | `storageRoot` | Root folder for campaign data (default: `.campaign`). |
 
-### 2. Using Environment Variables
-Alternatively, you can export these variables in your shell:
-```bash
-export ANTHROPIC_API_KEY="your_key_here"
-export GOOGLE_API_KEY="your_key_here"
-```
+> PDF/PPTX ingestion requires [IBM Docling](https://github.com/DS4SD/docling) on your `PATH`
+> (`pip install docling`). Markdown files need no extra tooling.
 
 ---
 
 ## 📖 Usage Examples
 
-Once installed, restart your CLI and invoke the agent:
+Once installed, restart your CLI and just talk to the agent — it will call the tools for you.
 
 ### 1. In Claude Code
-```bash
-/agent campaign-prompt-agent
+Ask directly, or route to the subagent:
+```text
+@campaign-prompt-agent ingest my campaign deck at ./docs/summer_launch.pdf
 ```
 
 ### 2. In Gemini CLI
-```bash
-/agent campaign-prompt-agent
+Run the slash command, or ask directly:
+```text
+/campaign-prompt-agent
 ```
 
 ### Example Workflow
