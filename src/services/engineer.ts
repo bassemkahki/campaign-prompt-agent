@@ -90,6 +90,33 @@ export class PromptEngineerService {
     };
   }
 
+  /**
+   * Generates a Seedance 2.0 motion prompt using @ImageN multimodal resolution.
+   * Logic: Identifies the 1-based index of the shot to reference the correct source image.
+   */
+  generateSeedance(brief: CreativeBrief, shotId: string): PromptOutput {
+    const index = brief.shotBreakdowns.findIndex(s => s.id === shotId);
+    
+    if (index === -1) {
+      throw new Error(`Shot with ID "${shotId}" not found in creative brief.`);
+    }
+
+    const shot = brief.shotBreakdowns[index];
+    const imageRef = `@Image${index + 1}`;
+    
+    // Base prompt starts with multimodal reference
+    const prompt = `${imageRef} ${shot.description}`;
+
+    return {
+      shotId,
+      model: "seedance-2",
+      prompt,
+      metadata: {
+        imageIndex: index + 1
+      }
+    };
+  }
+
   private matchVocab(input: string, vocab: string[], fallback: string): string {
     const normalizedInput = input.toLowerCase();
     const match = vocab.find(term => 
