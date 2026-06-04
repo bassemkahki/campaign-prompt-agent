@@ -112,8 +112,9 @@ export class PromptEngineerService {
     const identityParts = [subject, environment, visualStyle, mood].filter(Boolean);
     const identitySummary = identityParts.join(", ");
 
-    // 2. Action Delta
-    const finalAction = actionDelta || pose || "";
+    // 2. Action Delta: Sanitize to prevent prompt injection of command flags
+    const sanitize = (text: string) => text.replace(/\s-/g, " ");
+    const finalAction = sanitize(actionDelta || pose || "");
 
     // 3. Command Mapping
     const flags: string[] = [];
@@ -122,7 +123,7 @@ export class PromptEngineerService {
     }
 
     if (motionDirection) {
-      const dir = motionDirection.toLowerCase();
+      const dir = sanitize(motionDirection).toLowerCase();
       const intensityVal = motionIntensity || 5;
       
       // Keywords mapping with dynamic scaling
