@@ -92,7 +92,7 @@ export class PromptEngineerService {
 
   /**
    * Generates a Seedance 2.0 motion prompt using @ImageN multimodal resolution.
-   * Logic: Identifies the 1-based index of the shot to reference the correct source image.
+   * Logic: Uses Hybrid Context + Action Delta formula and maps motion descriptions to command flags.
    */
   generateSeedance(brief: CreativeBrief, shotId: string): PromptOutput {
     const index = brief.shotBreakdowns.findIndex(s => s.id === shotId);
@@ -104,15 +104,44 @@ export class PromptEngineerService {
     const shot = brief.shotBreakdowns[index];
     const imageRef = `@Image${index + 1}`;
     
-    // Base prompt starts with multimodal reference
-    const prompt = `${imageRef} ${shot.description}`;
+    // 1. Visual Identity: Subject, Environment, Style, Mood
+    const { subject, environment, actionDelta, pose, motionIntensity, motionDirection } = shot;
+    const { visualStyle } = brief.artDirection;
+    const { mood } = brief;
+
+    const identityParts = [subject, environment, visualStyle, mood].filter(Boolean);
+    const identitySummary = identityParts.join(", ");
+
+    // 2. Action Delta
+    const finalAction = actionDelta || pose || "";
+
+    // 3. Command Mapping
+    const flags: string[] = [];
+    if (motionIntensity !== undefined) {
+      flags.push(`-motion ${motionIntensity}`);
+    }
+
+    if (motionDirection) {
+      const dir = motionDirection.toLowerCase();
+      const intensityVal = motionIntensity || 5;
+      
+      // Keywords mapping with dynamic scaling
+      if (dir.includes("zoom")) flags.push(`-zoom ${intensityVal}`);
+      if (dir.includes("pan")) flags.push(`-pan ${intensityVal}`);
+      if (dir.includes("tilt")) flags.push(`-tilt ${intensityVal}`);
+    }
+
+    // Formula: @ImageN [Identity]. [Action Delta]. [Flags]
+    const promptBase = `${imageRef} ${identitySummary}. ${finalAction}.`.trim();
+    const prompt = flags.length > 0 ? `${promptBase} ${flags.join(" ")}` : promptBase;
 
     return {
       shotId,
       model: "seedance-2",
-      prompt,
+      prompt: prompt.replace(/\.\s+\./g, ".").trim(),
       metadata: {
-        imageIndex: index + 1
+        imageIndex: index + 1,
+        formula: "imageRef + identity + actionDelta + motionFlags"
       }
     };
   }
